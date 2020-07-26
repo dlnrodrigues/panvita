@@ -21,5 +21,7 @@ python3 compare.py -h
 User, you will be able to obtain this script using the simple command:
 
 ```
-
+git clone https://github.com/dlnrodrigues/compare.git
+cd compare
+python3 compare.py -h
 ```
