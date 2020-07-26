@@ -7,12 +7,12 @@ The figure created by the script is known as a clustermap and by default uses a 
 
 To use the script it is possible to use the command:
 
-'''
+```
 python3 compare.py
-'''
+```
 
 or
 
-'''
+```
 python3 compare.py -h
-'''
+```
