@@ -25,3 +25,18 @@ git clone https://github.com/dlnrodrigues/compare.git
 cd compare
 python3 compare.py -h
 ```
+## What about dependencies?
+Yes, we use dependencies to make this tool work. Therefore it will try to obtain all dependencies and databases automatically, however, if it is not possible you will have to obtain them by traditional means.
+
+```
+pip install wget
+pip install seaborn
+pip install pandas
+```
+
+If you have conda support, the following commands may work:
+```
+conda install -c anaconda wget
+conda install seaborn
+conda install pandas
+```
