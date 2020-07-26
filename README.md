@@ -16,3 +16,10 @@ or
 ```
 python3 compare.py -h
 ```
+
+## How to get this tool?
+User, you will be able to obtain this script using the simple command:
+
+```
+
+```
