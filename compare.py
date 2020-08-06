@@ -471,13 +471,13 @@ for p in parameters:
 
 #################################################Gerar figura###################################################
 	if p == "-card":
-		out = "clustermap_card.png"
+		out = "clustermap_card.pdf"
 		color = "Blues"
 	elif p == "-vfdb":
-		out = "clustermap_vfdb.png"
+		out = "clustermap_vfdb.pdf"
 		color = "Reds"
 	elif p == "-bacmet":
-		out = "clustermap_bacmet.png"
+		out = "clustermap_bacmet.pdf"
 		color = "Greens"
 
 	df = pd.read_csv(titulo, sep=';')
@@ -495,7 +495,7 @@ for p in parameters:
 		y = 100
 	print("\nPlotting final clustermap...")
 	p2 = sns.clustermap(df, figsize=(x,y), cmap=color)
-	p2.savefig(out, format='png', dpi=200, bbox_inches="tight")
+	p2.savefig(out, format='pdf', dpi=200, bbox_inches="tight")
 #################################################Gerar figura###################################################
 
 #################################################Organizando#################################################
