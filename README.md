@@ -17,6 +17,14 @@ or
 python3 compare.py -h
 ```
 
+Basically it is possible to use this tool through the command:
+
+```
+python3 compare.py -card -vfdb -bacmet * .gbk
+```
+
+IMPORTANT INFORMATION: As input you must use .gbk or .gbf files.
+
 ## How to get this tool?
 User, you will be able to obtain this script using the simple command:
 
