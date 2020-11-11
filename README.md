@@ -40,6 +40,7 @@ Yes, we use dependencies to make this tool work. Therefore it will try to obtain
 pip install wget
 pip install seaborn
 pip install pandas
+pip install matplotlib
 ```
 
 If you have conda support, the following commands may work:
@@ -47,4 +48,5 @@ If you have conda support, the following commands may work:
 conda install -c anaconda wget
 conda install seaborn
 conda install pandas
+conda install -c conda-forge matplotlib
 ```
