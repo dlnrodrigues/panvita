@@ -30,7 +30,7 @@ This script has the function of comparing multiple genomes against previously se
 The result consists of a clustermap and a presence matrix.
 
 As input use GBF or GBK files derived from Prokka or available on NCBI.
-WARNING! Files from NCBI MUST have .gbf extension.
+WARNING! Files from NCBI MUST have .gbf or .gbff extension.
 
 USAGE:
 python3 '''+sys.argv[0]+''' -card -vfdb -bacmet files.gbk\n
