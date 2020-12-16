@@ -1,4 +1,4 @@
-# PanViTa
+# PanViTa - Pan Virulence and resisTance Analysis
 Hello Friend!
 
 This is a script designed to make comparisons between multiple genomes and specific databases (CARD, BacMet and VFDB).
