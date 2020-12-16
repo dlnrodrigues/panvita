@@ -29,8 +29,8 @@ IMPORTANT INFORMATION: As input you must use .gbk, .gbf or .gbff files.
 User, you will be able to obtain this script using the simple command:
 
 ```
-git clone https://github.com/dlnrodrigues/compare.git
-cd compare
+git clone https://github.com/dlnrodrigues/panvita.git
+cd panvita
 python3 panvita.py -h
 ```
 ## What about dependencies?
