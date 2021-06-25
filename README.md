@@ -5,6 +5,8 @@ This is a script designed to make comparisons between multiple genomes and speci
 If you have another database in mind, feel free to send a request to dlnrodrigues@ufmg.br and we will update the code.
 The figure created by the script is known as a clustermap and by default uses a Euclidean distance measure to group the data.
 
+IMPORTANT INFORMATION: The PanViTa tool is free to use under registration 20210006 of the Federal University of Minas Gerais, and is therefore the intellectual property of the institution. For this reason unofficial changes to the original script will not be allowed without prior consent.
+
 To use the script it is possible to use the command:
 
 ```
