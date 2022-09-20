@@ -323,6 +323,7 @@ def extract_positions(a):
 	cds = gbk.readlines()
 	gbk.close()
 	positions = {}
+	lenght = 0
 	for i in range(0, len(cds)):
 		if "   CDS   " in cds[i]:
 			locus_tag = ""
@@ -332,18 +333,34 @@ def extract_positions(a):
 					position = cds[j].replace('\n', '')
 					position = position.replace("CDS", "")
 					position = position.strip()
-					if "complement(" in position:
+					if "complement(join(" in position:
+						position = position.replace("complement(join(", "")
+						position = position.replace(")","").replace("<","").replace(">","").strip()
+						position = position.split("..")
+						position = [int(position[0])+lenght, int(position[2])+lenght]
+					elif "complement(" in position:
 						position = position.replace("complement(", "")
-						position = position.replace(")","")
-					position = position.strip()
-					position = position.replace("..","\t")
+						position = position.replace(")","").replace("<","").replace(">","").strip()
+						position = position.split("..")
+						position = [int(position[0])+lenght, int(position[1])+lenght]
+					elif "join(" in position:
+						position = position.replace("join(", "")
+						position = position.replace(")","").replace("<","").replace(">","").strip()
+						position = position.split("..")
+						position = [int(position[0])+lenght, int(position[2])+lenght]
+					else:
+						position = position.replace("<","").replace(">","").strip()
+						position = position.split("..")
+						position = [int(position[0])+lenght, int(position[1])+lenght]
 				if "/locus_tag=" in cds[j]:
 					locus_tag = cds[j].replace("/locus_tag=", "")
 					locus_tag = locus_tag.strip()
 					locus_tag = locus_tag.replace("\"", "")
 					locus_tag = locus_tag.replace("\n", "")
-					positions[locus_tag] = position
+					positions[locus_tag] = str(position[0])+"\t"+str(position[1])
 					break
+		if "CONTIG " in cds[i]:
+			lenght = lenght + int(cds[i].strip().replace(")","").split("..")[-1])
 	return(positions)
 
 def align(a, b, c):
