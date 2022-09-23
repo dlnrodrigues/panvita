@@ -324,30 +324,49 @@ def extract_positions(a):
 	gbk.close()
 	positions = {}
 	lenght = 0
+	totalcds = 0
 	for i in range(0, len(cds)):
 		if "   CDS   " in cds[i]:
 			locus_tag = ""
 			position = ""
 			for j in range(i, len(cds)):
 				if "   CDS   " in cds[j]:
+					totalcds = totalcds + 1
 					position = cds[j].replace('\n', '')
 					position = position.replace("CDS", "")
 					position = position.strip()
+					if (">" in position) or ("<" in position):
+						break
 					if "complement(join(" in position:
 						position = position.replace("complement(join(", "")
-						position = position.replace(")","").replace("<","").replace(">","").strip()
+						position = position.replace(")","").strip()
 						position = position.split("..")
-						position = [int(position[0])+lenght, int(position[2])+lenght]
+						if "," in position[0]:
+							temp = position[0].split(",")
+							position[0] = temp[0]
+						if totalcds == 1:
+							try:
+								position = [int(position[0])+lenght, int(position[1])+lenght]
+							except:
+								position = [int(position[0])+lenght, int(position[2])+lenght]
 					elif "complement(" in position:
 						position = position.replace("complement(", "")
-						position = position.replace(")","").replace("<","").replace(">","").strip()
+						position = position.replace(")","").strip()
 						position = position.split("..")
 						position = [int(position[0])+lenght, int(position[1])+lenght]
 					elif "join(" in position:
 						position = position.replace("join(", "")
-						position = position.replace(")","").replace("<","").replace(">","").strip()
+						position = position.replace(")","").strip()
 						position = position.split("..")
-						position = [int(position[0])+lenght, int(position[2])+lenght]
+						if "," in position[0]:
+							temp = position[0].split(",")
+							position[0] = temp[0]
+							print(position)
+						if totalcds == 1:
+							try:
+								position = [int(position[0])+lenght, int(position[1])+lenght]
+							except:
+								position = [int(position[0])+lenght, int(position[2])+lenght]
 					else:
 						position = position.replace("<","").replace(">","").strip()
 						position = position.split("..")
