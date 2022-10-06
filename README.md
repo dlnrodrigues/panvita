@@ -56,25 +56,25 @@ conda install -c conda-forge matplotlib
 PanViTa uses some parameters to work properly. They are listed bellow.
 ### Databases
 ```
--bacmet\tAntibacterial Biocide and Metal Resistance Genes Database
--card\tComprehensive Antibiotic Resistance Database
--vfdb\tVirulence Factor Database
+-bacmet Antibacterial Biocide and Metal Resistance Genes Database
+-card Comprehensive Antibiotic Resistance Database
+-vfdb Virulence Factor Database
 ```
 ### Parameters
 ```
--update\tUpdate databases and dependences
--u\tSame as -update
--help\tPrint this help
--h\tSame as -help
--keep\tMaintains the protein sequences used, as well as the CDS position files
--k\tSame as -keep
--i\tMinimum identity to infer presence (default = 70)
--c\tMinimum coverage to infer presence (default = 70)
--pdf\tFigures will be saved as PDF (default)
--png\tFigures will be saved as PNG (WARNING! High memory consumption)
--g\tDownload the genomes fasta files (require CSV table from NCBI)
--a\tDownload and annote the genomes using PROKKA pipeline (require CSV table from NCBI)
--b\tDownload the genome GenBank files (require CSV table from NCBI)
--s\tKeep the locus_tag as same as the strain (require -b)
--m\tGet the metadata from BioSample IDs (require CSV table from NCBI)
+-update Update databases and dependences
+-u  Same as -update
+-help Print this help
+-h  Same as -help
+-keep Maintains the protein sequences used, as well as the CDS position files
+-k  Same as -keep
+-i  Minimum identity to infer presence (default = 70)
+-c  Minimum coverage to infer presence (default = 70)
+-pdf  Figures will be saved as PDF (default)
+-png  Figures will be saved as PNG (WARNING! High memory consumption)
+-g  Download the genomes fasta files (require CSV table from NCBI)
+-a  Download and annote the genomes using PROKKA pipeline (require CSV table from NCBI)
+-b  Download the genome GenBank files (require CSV table from NCBI)
+-s  Keep the locus_tag as same as the strain (require -b)
+-m  Get the metadata from BioSample IDs (require CSV table from NCBI)
 ```
