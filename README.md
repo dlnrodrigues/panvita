@@ -57,24 +57,24 @@ PanViTa uses some parameters to work properly. They are listed bellow.
 ### Databases
 ```
 -bacmet Antibacterial Biocide and Metal Resistance Genes Database
--card Comprehensive Antibiotic Resistance Database
--vfdb Virulence Factor Database
+-card   Comprehensive Antibiotic Resistance Database
+-vfdb   Virulence Factor Database
 ```
 ### Parameters
 ```
 -update Update databases and dependences
--u  Same as -update
--help Print this help
--h  Same as -help
--keep Maintains the protein sequences used, as well as the CDS position files
--k  Same as -keep
--i  Minimum identity to infer presence (default = 70)
--c  Minimum coverage to infer presence (default = 70)
--pdf  Figures will be saved as PDF (default)
--png  Figures will be saved as PNG (WARNING! High memory consumption)
--g  Download the genomes fasta files (require CSV table from NCBI)
--a  Download and annote the genomes using PROKKA pipeline (require CSV table from NCBI)
--b  Download the genome GenBank files (require CSV table from NCBI)
--s  Keep the locus_tag as same as the strain (require -b)
--m  Get the metadata from BioSample IDs (require CSV table from NCBI)
+-u      Same as -update
+-help   Print this help
+-h      Same as -help
+-keep   Maintains the protein sequences used, as well as the CDS position files
+-k      Same as -keep
+-i      Minimum identity to infer presence (default = 70)
+-c      Minimum coverage to infer presence (default = 70)
+-pdf    Figures will be saved as PDF (default)
+-png    Figures will be saved as PNG (WARNING! High memory consumption)
+-g      Download the genomes fasta files (require CSV table from NCBI)
+-a      Download and annote the genomes using PROKKA pipeline (require CSV table from NCBI)
+-b      Download the genome GenBank files (require CSV table from NCBI)
+-s      Keep the locus_tag as same as the strain (require -b)
+-m      Get the metadata from BioSample IDs (require CSV table from NCBI)
 ```
