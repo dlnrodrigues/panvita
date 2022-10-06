@@ -27,7 +27,7 @@ python3 panvita.py -card -vfdb -bacmet *.gbk
 
 IMPORTANT INFORMATION: As input you must use .gbk, .gbf or .gbff files.
 
-## How to get this tool?
+## How do I get this tool?
 User, you will be able to obtain this script using the simple command:
 
 ```
@@ -51,4 +51,30 @@ conda install -c anaconda wget
 conda install seaborn
 conda install pandas
 conda install -c conda-forge matplotlib
+```
+## How do I use this tool?
+PanViTa uses some parameters to work properly. They are listed bellow.
+### Databases
+```
+-bacmet\tAntibacterial Biocide and Metal Resistance Genes Database
+-card\tComprehensive Antibiotic Resistance Database
+-vfdb\tVirulence Factor Database
+```
+### Parameters
+```
+-update\tUpdate databases and dependences
+-u\tSame as -update
+-help\tPrint this help
+-h\tSame as -help
+-keep\tMaintains the protein sequences used, as well as the CDS position files
+-k\tSame as -keep
+-i\tMinimum identity to infer presence (default = 70)
+-c\tMinimum coverage to infer presence (default = 70)
+-pdf\tFigures will be saved as PDF (default)
+-png\tFigures will be saved as PNG (WARNING! High memory consumption)
+-g\tDownload the genomes fasta files (require CSV table from NCBI)
+-a\tDownload and annote the genomes using PROKKA pipeline (require CSV table from NCBI)
+-b\tDownload the genome GenBank files (require CSV table from NCBI)
+-s\tKeep the locus_tag as same as the strain (require -b)
+-m\tGet the metadata from BioSample IDs (require CSV table from NCBI)
 ```
