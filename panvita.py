@@ -4,6 +4,7 @@ import sys
 import os
 import shutil
 import math
+import time
 try:
 	import wget
 except:
@@ -134,8 +135,8 @@ def getMeta(a):
 		spex = dic2[i][0].split(" ")
 		spex = spex[0]+" "+spex[1]
 		out.write(str(spex)+";")
-		temp = str(i).replace(" ","_").replace("(","").replace(")","").replace(";","").replace(",","")
-		temp3 = str(i).replace(" ","_").replace("(","").replace(")","").replace(";","").replace(",","")
+		temp = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
+		temp3 = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
 		out.write(temp+";")
 		ID = "https://www.ncbi.nlm.nih.gov/biosample/"+str(dic2[i][3])
 		print(ID)
@@ -194,12 +195,15 @@ def getNCBI_GBF():
 			ftp = dic[i][1]
 			file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.gbff.gz"
 			ftp = ftp + file
-			print(ftp)
-		else:
+			print("Strain",i,"\n",ftp)
+		elif type(dic[i][2]) == str:
 			ftp = dic[i][2]
 			file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.gbff.gz"
 			ftp = ftp + file
-			print(ftp)
+			print("Strain",i,"\n",ftp)
+		else:
+			print("ERRO: It was'nt possible to download the file",i+".\nPlease check the log file.\n")
+			continue
 		file = wget.download(ftp)
 		print("\n")
 		os.system("gunzip "+str(file))
@@ -207,12 +211,16 @@ def getNCBI_GBF():
 		dic[i] = (dic[i][0], file)
 		genus = dic[i][0].split(" ")[0]
 		species = dic[i][0].split(" ")[1]
-		strain = i.replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","")
+		strain = i.replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
 		if "-s" in sys.argv:
 			ltag = strain
 		else:
 			ltag = genus[0]+species+"_"+strain
-		os.rename(file, ltag+".gbf")
+		try:
+			os.rename(file, ltag+".gbf")
+		except:
+			time.sleep(3)
+			os.rename(file, ltag+".gbf")
 		temp = "./"+ltag+".gbf"
 		gbff.append(temp)
 	return(gbff)
@@ -226,12 +234,15 @@ def getNCBI_FNA():
 			ftp = dic3[i][1]
 			file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.fna.gz"
 			ftp = ftp + file
-			print(ftp)
-		else:
+			print("Strain",i,"\n",ftp)
+		elif type(dic3[i][2]) == str:
 			ftp = dic3[i][2]
 			file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.fna.gz"
 			ftp = ftp + file
-			print(ftp)
+			print("Strain",i,"\n",ftp)
+		else:
+			print("ERRO: It was'nt possible to download the file",i+".\nPlease check the log file.\n")
+			continue
 		file = wget.download(ftp)
 		print("\n")
 		os.system("gunzip "+str(file))
@@ -239,8 +250,12 @@ def getNCBI_FNA():
 		dic3[i] = (dic3[i][0], file)
 		genus = dic3[i][0].split(" ")[0]
 		species = dic3[i][0].split(" ")[1]
-		strain = i.replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","")
-		file = os.rename(file, strain+".fna")
+		strain = i.replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
+		try:
+			file = os.rename(file, strain+".fna")
+		except:
+			time.sleep(3)
+			file = os.rename(file, strain+".fna")
 		file = strain+".fna"
 		ltag = genus[0]+species[0]+strain
 		temp = "./"+ltag+"/"+strain+".gbf"
