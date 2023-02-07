@@ -78,3 +78,7 @@ PanViTa uses some parameters to work properly. They are listed bellow.
 -s      Keep the locus_tag as same as the strain (require -b)
 -m      Get the metadata from BioSample IDs (require CSV table from NCBI)
 ```
+## Citing
+Se você achou nossa ferramenta util, por favor, não deixe de nos citar em suas publicações.
+Rodrigues, D. L. N. et al. PanViTa: Pan Virulence and resisTance analysis. Frontiers in Bioinformatics 3, (2023).
+https://doi.org/10.3389/fbinf.2023.1070406
