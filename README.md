@@ -80,5 +80,7 @@ PanViTa uses some parameters to work properly. They are listed bellow.
 ```
 ## Citing
 If you have found our tool useful, please don't forget to quote us in your publications.
+
 Rodrigues, D. L. N. et al. PanViTa: Pan Virulence and resisTance analysis. Frontiers in Bioinformatics 3, (2023).
+
 https://doi.org/10.3389/fbinf.2023.1070406
