@@ -70,6 +70,8 @@ PanViTa uses some parameters to work properly. They are listed bellow.
 -k      Same as -keep
 -i      Minimum identity to infer presence (default = 70)
 -c      Minimum coverage to infer presence (default = 70)
+-d      Force to use DIAMOND from system
+-diamond      Same as -d
 -pdf    Figures will be saved as PDF (default)
 -png    Figures will be saved as PNG (WARNING! High memory consumption)
 -g      Download the genomes fasta files (require CSV table from NCBI)
