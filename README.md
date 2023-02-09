@@ -66,6 +66,7 @@ PanViTa uses some parameters to work properly. They are listed bellow.
 -u      Same as -update
 -help   Print this help
 -h      Same as -help
+-v      Print version and exit
 -keep   Maintains the protein sequences used, as well as the CDS position files
 -k      Same as -keep
 -i      Minimum identity to infer presence (default = 70)
