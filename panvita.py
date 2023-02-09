@@ -22,12 +22,22 @@ except:
 			conda install -c conda-forge python-wget
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
+		
+version = ("1.0.1")
+
+if ("-v" in sys.argv) or ("-version" in sys.argv):
+	print("-----------------------------------------------")
+	print("PanViTa - Pan Virulence and resisTance Analysis")
+	print("https://doi.org/10.3389/fbinf.2023.1070406")
+	print("version", version)
+	print("-----------------------------------------------")
+	exit()
 
 if (("-card" not in sys.argv) and ("-bacmet" not in sys.argv) and ("-vfdb" not in sys.argv) and ("-u" not in sys.argv) and ("-update" not in sys.argv) and ("-g" not in sys.argv) and ("-a" not in sys.argv) and ("-m" not in sys.argv) and ("-b" not in sys.argv)) or ("-h" in sys.argv) or ("-help" in sys.argv):
 	print('''
 Hello user!
 
-This script has the function of comparing multiple genomes against previously selected databases.
+PanViTa has the function of comparing multiple genomes against previously selected databases.
 The result consists of a clustermap and a presence matrix.
 
 As input use GBF or GBK files derived from Prokka or available on NCBI.
@@ -45,6 +55,7 @@ Parameters:
 -u\tSame as -update
 -help\tPrint this help
 -h\tSame as -help
+-v\tPrint version and exit
 -keep\tMaintains the protein sequences used, as well as the CDS position files
 -k\tSame as -keep
 -i\tMinimum identity to infer presence (default = 70)
@@ -436,6 +447,7 @@ def blastmining(a):
 						saida.write(j)
 	except:
 		y = 0
+
 ##################################Functions end################################
 diamond_exe = "Dependences/diamond"
 if ("-d" in sys.argv) or ("-diamond" in sys.argv):
