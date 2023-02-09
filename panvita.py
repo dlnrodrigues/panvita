@@ -50,7 +50,6 @@ Parameters:
 -i\tMinimum identity to infer presence (default = 70)
 -c\tMinimum coverage to infer presence (default = 70)
 -d\tForce to use DIAMOND from system
--diamond\tSame as -d
 -pdf\tFigures will be saved as PDF (default)
 -png\tFigures will be saved as PNG (WARNING! High memory consumption)
 -g\tDownload the genomes fasta files (require CSV table from NCBI)
