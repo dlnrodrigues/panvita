@@ -848,14 +848,18 @@ for p in parameters:
 	if y >= 100:
 		y = 100
 	print("\nPlotting final clustermap...")
-	if (x > 1.9) and (y > 1.9):
-		plt.figure()
-		p2 = sns.clustermap(df, figsize=(x,y), cmap=color)
-		p2.savefig(out, format=fileTipe, dpi=200, bbox_inches="tight")
-	else:
-		plt.subplots(figsize=(x,y))
-		p2 = sns.heatmap(df, cmap=color, vmin=0, vmax=100)
-		p2.figure.savefig(out, format=fileTipe, dpi=200, bbox_inches="tight")
+	try:
+		if (x > 1.9) and (y > 1.9):
+			plt.figure()
+			p2 = sns.clustermap(df, figsize=(x,y), cmap=color)
+			p2.savefig(out, format=fileTipe, dpi=200, bbox_inches="tight")
+		else:
+			plt.subplots(figsize=(x,y))
+			p2 = sns.heatmap(df, cmap=color, vmin=0, vmax=100)
+			p2.figure.savefig(out, format=fileTipe, dpi=200, bbox_inches="tight")
+	except:
+		print("\nIt was not possible to plot the "+out+" figure...")
+		print("Please verify the GenBank files and the matrix_x.csv output.")
 #################################################Gerar figura###################################################
 
 ############################################Omics#########################################
