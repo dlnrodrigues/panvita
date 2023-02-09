@@ -481,6 +481,13 @@ except:
 	print("You may not have \'Matplotlib\'.\nWe will try to install using pip3...")
 	os.system("python -m pip install -U matplotlib")
 	import matplotlib.pyplot as plt
+try:
+	print('\nTrying to import \'SciPy\'')
+	import scipy
+except:
+	print("You may not have \'SciPy\'.\nWe will try to install using pip...")
+	os.system("pip install scipy --user")
+	import scipy
 #############################################NEW################################################################
 if ("-a" in sys.argv) or ("-b" in sys.argv) or ("-g" in sys.argv) or ("-m" in sys.argv):
 	for i in sys.argv:
