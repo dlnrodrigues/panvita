@@ -1197,7 +1197,8 @@ if ("-keep" not in sys.argv) and ("-k" not in sys.argv):
 print('''That's all, folks!
 Thank you for using this script.
 If you're going to use results from PanViTa, please cite us:
-PanViTa\thttps://doi.org/10.3389/fbinf.2023.1070406
+
+PanViTa\thttps://doi.org/10.3389/fbinf.2023.1070406\t2023
 
 Do not forget to quote the databases used.\n''')
 if "-bacmet" in sys.argv:
