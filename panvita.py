@@ -635,7 +635,6 @@ for i in files:
 		if j == tempName:
 			print("Extracting "+j)
 			faa = open("faa/"+j+".faa", 'w')
-			print(i)
 			try:
 				k = extract_faa(i)
 			except:
