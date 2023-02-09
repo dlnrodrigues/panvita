@@ -49,6 +49,8 @@ Parameters:
 -k\tSame as -keep
 -i\tMinimum identity to infer presence (default = 70)
 -c\tMinimum coverage to infer presence (default = 70)
+-d\tForce to use DIAMOND from system
+-diamond\tSame as -d
 -pdf\tFigures will be saved as PDF (default)
 -png\tFigures will be saved as PNG (WARNING! High memory consumption)
 -g\tDownload the genomes fasta files (require CSV table from NCBI)
@@ -96,7 +98,7 @@ def checkDB():
 		print("\nDownloading BacMet database...")
 		bacmet = wget.download("http://bacmet.biomedicine.gu.se/download/BacMet2_EXP_database.fasta")
 		os.rename(bacmet, "DB/bacmet_2.fasta")
-		os.system("Dependences/diamond makedb --in DB/bacmet_2.fasta -d DB/bacmet_2 --quiet")
+		os.system(diamond_exe+" makedb --in DB/bacmet_2.fasta -d DB/bacmet_2 --quiet")
 		print("\nDownloading BacMet annotation file...")
 		bacmet_an = wget.download("http://bacmet.biomedicine.gu.se/download/BacMet2_EXP.753.mapping.txt")
 		os.rename(bacmet_an, "DB/bacmet_2.txt")
@@ -106,7 +108,7 @@ def checkDB():
 		os.rename(vfdb, "vfdb_core.fasta.gz")
 		os.system("gunzip -d vfdb_core.fasta.gz")
 		os.rename("vfdb_core.fasta", "DB/vfdb_core.fasta")
-		os.system("Dependences/diamond makedb --in DB/vfdb_core.fasta -d DB/vfdb_core --quiet")
+		os.system(diamond_exe+" makedb --in DB/vfdb_core.fasta -d DB/vfdb_core --quiet")
 	if "card_protein_homolog_model.fasta" not in os.listdir("DB"):
 		atual = os.listdir()
 		print("\nDownloading CARD database...")
@@ -117,7 +119,7 @@ def checkDB():
 		for i in os.listdir():
 			if i not in atual:
 				os.remove(i)
-		os.system("Dependences/diamond makedb --in DB/card_protein_homolog_model.fasta -d DB/card_protein_homolog_model --quiet")
+		os.system(diamond_exe+" makedb --in DB/card_protein_homolog_model.fasta -d DB/card_protein_homolog_model --quiet")
 	'''if "megares_v2.fasta" not in os.listdir("DB"):
 		print("\nDownloading MEGARes database...")
 		megares = wget.download("https://megares.meglab.org/download/megares_v2.00/megares_full_database_v2.00.fasta")
@@ -401,7 +403,7 @@ def align(a, b, c):
 	#a = input
 	#b = title
 	#c = result
-	cmd = 'Dependences/diamond blastp -q '+a+' -d '+b+' -o '+c+' --quiet -k 1 -e 5e-6 -f 6 qseqid sseqid pident qcovhsp mismatch gapopen qstart qend sstart send evalue bitscore'
+	cmd = diamond_exe+' blastp -q '+a+' -d '+b+' -o '+c+' --quiet -k 1 -e 5e-6 -f 6 qseqid sseqid pident qcovhsp mismatch gapopen qstart qend sstart send evalue bitscore'
 	print(cmd)
 	os.system(cmd)
 
@@ -436,7 +438,12 @@ def blastmining(a):
 	except:
 		y = 0
 ##################################Functions end################################
-
+diamond_exe = "Dependences/diamond"
+if ("-d" in sys.argv) or ("-diamond" in sys.argv):
+	if type(shutil.which("diamond")) == str:
+		diamond_exe = shutil.which("diamond")
+	else:
+		print("\nWe could'nt locate DIAMOND on your system.\nWe'll try to use the default option.\nPlease verify the alignment outputs.\n")
 
 if ("-update" in sys.argv) or ("-u" in sys.argv):
 	if "Dependences" in os.listdir():
@@ -572,11 +579,25 @@ for i in files:
 		k = extract_positions(i)
 	except:
 		try:
-			i = i.replace(".gbff", ".gbk")
-			k = extract_positions(i)
+			f = i.replace(".gbff", ".gbk")
+			k = extract_positions(f)
 		except:
-			i = i.replace(".gbf", ".gbk")
-			k = extract_positions(i)
+			try:
+				f = i.replace(".gbf", ".gbk")
+				k = extract_positions(f)
+			except:
+				if os.path.exists(i) == True:
+					print("\n**WARNING**\nIt was not possible to handle the file "+str(i)+"...")
+					print("It will be skiped.")
+					print("Please verify the input format.\n")
+					files.pop(files.index(i))
+					continue
+				else:
+					print("\n**WARNING**\nIt was not possible to find the file "+str(i)+"...")
+					print("It will be skiped.")
+					print("Please verify the absolute path of the files.\n")
+					files.pop(files.index(i))
+					continue
 	print("The positions of the "+i+" file have been extracted")
 	strain = str(i)[::-1].split('/')[0][::-1].replace(".gbk", "").replace(".gbff", "").replace(".gbf", "")
 	strains.append(strain)
@@ -614,6 +635,7 @@ for i in files:
 		if j == tempName:
 			print("Extracting "+j)
 			faa = open("faa/"+j+".faa", 'w')
+			print(i)
 			try:
 				k = extract_faa(i)
 			except:
