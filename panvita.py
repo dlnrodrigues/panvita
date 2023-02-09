@@ -475,14 +475,14 @@ except:
 	os.system("pip install seaborn --user")
 	import seaborn as sns
 try:
-	print('Trying to import \'Matplotlib\'\n')
+	print('Trying to import \'Matplotlib\'')
 	import matplotlib.pyplot as plt
 except:
 	print("You may not have \'Matplotlib\'.\nWe will try to install using pip3...")
 	os.system("python -m pip install -U matplotlib")
 	import matplotlib.pyplot as plt
 try:
-	print('\nTrying to import \'SciPy\'')
+	print('\nTrying to import \'SciPy\'\n')
 	import scipy
 except:
 	print("You may not have \'SciPy\'.\nWe will try to install using pip...")
