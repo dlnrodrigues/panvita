@@ -262,7 +262,7 @@ def getNCBI_FNA():
 		ltag = genus[0]+species[0]+strain
 		temp = "./"+ltag+"/"+strain+".gbf"
 		pkgbf.append(temp)
-		cmd = ("prokka --addgenes --force --species "+species+" --genus "+genus+" --strain "+strain+" "+file+" --prefix "+strain+" --outdir "+ltag+" --locustag "+ltag)
+		cmd = ("prokka --addgenes --force --species "+species+" --genus "+genus+" --strain "+strain+" "+file+" --prefix "+ltag+" --outdir "+ltag+" --locustag "+ltag)
 		if ltag not in os.listdir():
 			pk.append(cmd)
 	uscript = open("PROKKA.sh","w")
