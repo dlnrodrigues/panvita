@@ -23,7 +23,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.0.1")
+version = ("1.0.2")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -363,7 +363,8 @@ def extract_positions(a):
 					position = position.replace("CDS", "")
 					position = position.strip()
 					if (">" in position) or ("<" in position):
-						break
+						position = position.replace(">", "").replace("<","")
+						#break
 					if "complement(join(" in position:
 						position = position.replace("complement(join(", "")
 						position = position.replace(")","").strip()
@@ -985,8 +986,8 @@ for p in parameters:
 	df["Number of Genomes"] = list(range(1,(len(df["Strains"].tolist()))+1))
 	df = df.rename(columns={'Core': 'Number of Genes'})
 	plt.figure()
-	p1 = sns.lineplot(data=df, x="Number of Genomes", y="Pan", palette="Set2", label=l1)
-	p1 = sns.lineplot(data=df, x="Number of Genomes", y="Number of Genes", palette="Set2", label=l2).set_title(t4)
+	p1 = sns.lineplot(data=df, x="Number of Genomes", y="Pan", label=l1)
+	p1 = sns.lineplot(data=df, x="Number of Genomes", y="Number of Genes", label=l2).set_title(t4)
 	p1.figure.savefig(t5, format=fileTipe, dpi=300, bbox_inches="tight")
 ############################################Omics#########################################
 
