@@ -23,7 +23,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.0.2")
+version = ("1.0.3")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -452,7 +452,9 @@ def blastmining(a):
 ##################################Functions end################################
 diamond_exe = "Dependences/diamond"
 if ("-d" in sys.argv) or ("-diamond" in sys.argv):
-	if type(shutil.which("diamond")) == str:
+	if type(shutil.which("diamond-aligner")) == str:
+		diamond_exe = shutil.which("diamond-aligner")
+	elif type(shutil.which("diamond")) == str:
 		diamond_exe = shutil.which("diamond")
 	else:
 		print("\nWe could'nt locate DIAMOND on your system.\nWe'll try to use the default option.\nPlease verify the alignment outputs.\n")
@@ -906,6 +908,8 @@ for p in parameters:
 		l2 = "Core-resistome"
 		t6 = "card_mechanisms.csv"
 		t7 = "card_drug_classes.csv"
+		t8 = "card_mechanisms_barplot."+fileTipe
+		t9 = "card_drug_classes_barplot."+fileTipe
 	if p == "-vfdb":
 		t1 = "vfdb_gene_count.csv"
 		t2 = "vfdb_strain_count.csv"
@@ -923,6 +927,7 @@ for p in parameters:
 		l2 = "Core-resistome"
 		t6 = "bacmet_heavy_metals.csv"
 		t7 = "bacmet_all_compounds.csv"
+		t8 = "bacmet_heavy_metals_barplot."+fileTipe
 	t5 = t3.replace("csv", fileTipe)	
 #Per genes
 	df2 = df
@@ -1113,6 +1118,27 @@ for p in parameters:
 			if (coreM != 0) or (accessoryM != 0) or (exclusiveM != 0):
 				out2.write(str(k).capitalize()+";"+str(coreM)+";"+str(accessoryM)+";"+str(exclusiveM)+"\n")
 		out2.close()
+	
+		data = pd.read_csv(t6, sep=";", index_col=("Resistance Mechanism"))
+		x = len(list(data["Core"])) * 1
+		y = 0
+		for i in data:
+			for j in range(0, len(data["Core"])):
+				if data[i][j] >= y:
+					y = data[i][j] / 3.5
+		ax = data.plot.bar(figsize=(x,y), fontsize=15)
+		ax.figure.savefig(t8, format=fileTipe, dpi=300, bbox_inches="tight")
+
+		data = pd.read_csv(t7, sep=";", index_col=("Drug Class"))
+		x = len(list(data["Core"])) * 1
+		y = 0
+		for i in data:
+			for j in range(0, len(data["Core"])):
+				if data[i][j] >= y:
+					y = data[i][j] / 3.5
+		ax = data.plot.bar(figsize=(x,y), fontsize=15)
+		ax.figure.savefig(t9, format=fileTipe, dpi=300, bbox_inches="tight")
+	
 	if p == "-bacmet":
 		db = pd.read_csv("DB/bacmet_2.txt", sep="\t")
 		genes = db["Gene_name"].tolist()
@@ -1152,9 +1178,9 @@ for p in parameters:
 			else:
 				exclusive_ome.append(i)
 		outa = open(t6, 'w')
-		outa.write("Composto;Core;Accessory;Exclusive\n")
+		outa.write("Compound;Core;Accessory;Exclusive\n")
 		outb = open(t7, 'w')
-		outb.write("Composto;Core;Accessory;Exclusive\n")
+		outb.write("Compound;Core;Accessory;Exclusive\n")
 		for k in comp:
 			core = 0
 			for i in core_ome:
@@ -1192,6 +1218,16 @@ for p in parameters:
 				outb.write(k+";"+str(core)+";"+str(accessory)+";"+str(exclusive)+"\n")
 		outa.close()
 		outb.close()
+		
+		data = pd.read_csv(t6, sep=";", index_col=("Compound"))
+		x = len(list(data["Core"])) * 1
+		y = 1
+		for i in data:
+			for j in range(0, len(data["Core"])):
+				if data[i][j] >= y:
+					y = data[i][j] / 3.5
+		ax = data.plot.bar(figsize=(x,y), fontsize=15)
+		ax.figure.savefig(t8, format=fileTipe, dpi=300, bbox_inches="tight")
 ################################################Pan_distribution#########################################
 
 #####################################################Organizando#################################################
