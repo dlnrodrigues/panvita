@@ -23,7 +23,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.0.3")
+version = ("1.0.4")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -854,19 +854,19 @@ for p in parameters:
 #################################################Gerar positions#################################################
 
 #################################################Gerar figura###################################################
-	fileTipe = "pdf"
+	fileType = "pdf"
 	if "-pdf" in sys.argv:
-		fileTipe = "pdf"
+		fileType = "pdf"
 	elif "-png" in sys.argv:
-		fileTipe = "png"
+		fileType = "png"
 	if p == "-card":
-		out = "clustermap_card."+fileTipe
+		out = "clustermap_card."+fileType
 		color = "Blues"
 	elif p == "-vfdb":
-		out = "clustermap_vfdb."+fileTipe
+		out = "clustermap_vfdb."+fileType
 		color = "Reds"
 	elif p == "-bacmet":
-		out = "clustermap_bacmet."+fileTipe
+		out = "clustermap_bacmet."+fileType
 		color = "Greens"
 
 	df = pd.read_csv(titulo, sep=';')
@@ -887,11 +887,11 @@ for p in parameters:
 		if (x > 1.9) and (y > 1.9):
 			plt.figure()
 			p2 = sns.clustermap(df, figsize=(x,y), cmap=color)
-			p2.savefig(out, format=fileTipe, dpi=200, bbox_inches="tight")
+			p2.savefig(out, format=fileType, dpi=200, bbox_inches="tight")
 		else:
 			plt.subplots(figsize=(x,y))
 			p2 = sns.heatmap(df, cmap=color, vmin=0, vmax=100)
-			p2.figure.savefig(out, format=fileTipe, dpi=200, bbox_inches="tight")
+			p2.figure.savefig(out, format=fileType, dpi=200, bbox_inches="tight")
 	except:
 		print("\nIt was not possible to plot the "+out+" figure...")
 		print("Please verify the GenBank files and the matrix_x.csv output.")
@@ -908,8 +908,8 @@ for p in parameters:
 		l2 = "Core-resistome"
 		t6 = "card_mechanisms.csv"
 		t7 = "card_drug_classes.csv"
-		t8 = "card_mechanisms_barplot."+fileTipe
-		t9 = "card_drug_classes_barplot."+fileTipe
+		t8 = "card_mechanisms_barplot."+fileType
+		t9 = "card_drug_classes_barplot."+fileType
 	if p == "-vfdb":
 		t1 = "vfdb_gene_count.csv"
 		t2 = "vfdb_strain_count.csv"
@@ -927,8 +927,8 @@ for p in parameters:
 		l2 = "Core-resistome"
 		t6 = "bacmet_heavy_metals.csv"
 		t7 = "bacmet_all_compounds.csv"
-		t8 = "bacmet_heavy_metals_barplot."+fileTipe
-	t5 = t3.replace("csv", fileTipe)	
+		t8 = "bacmet_heavy_metals_barplot."+fileType
+	t5 = t3.replace("csv", fileType)	
 #Per genes
 	df2 = df
 	headers = list(df2.columns.values)
@@ -993,7 +993,7 @@ for p in parameters:
 	plt.figure()
 	p1 = sns.lineplot(data=df, x="Number of Genomes", y="Pan", label=l1)
 	p1 = sns.lineplot(data=df, x="Number of Genomes", y="Number of Genes", label=l2).set_title(t4)
-	p1.figure.savefig(t5, format=fileTipe, dpi=300, bbox_inches="tight")
+	p1.figure.savefig(t5, format=fileType, dpi=300, bbox_inches="tight")
 ############################################Omics#########################################
 
 ############################################Pan_distribution#########################################
@@ -1118,26 +1118,29 @@ for p in parameters:
 			if (coreM != 0) or (accessoryM != 0) or (exclusiveM != 0):
 				out2.write(str(k).capitalize()+";"+str(coreM)+";"+str(accessoryM)+";"+str(exclusiveM)+"\n")
 		out2.close()
-	
-		data = pd.read_csv(t6, sep=";", index_col=("Resistance Mechanism"))
-		x = len(list(data["Core"])) * 1
-		y = 0
-		for i in data:
-			for j in range(0, len(data["Core"])):
-				if data[i][j] >= y:
-					y = data[i][j] / 3.5
-		ax = data.plot.bar(figsize=(x,y), fontsize=15)
-		ax.figure.savefig(t8, format=fileTipe, dpi=300, bbox_inches="tight")
 
-		data = pd.read_csv(t7, sep=";", index_col=("Drug Class"))
-		x = len(list(data["Core"])) * 1
-		y = 0
-		for i in data:
-			for j in range(0, len(data["Core"])):
-				if data[i][j] >= y:
-					y = data[i][j] / 3.5
-		ax = data.plot.bar(figsize=(x,y), fontsize=15)
-		ax.figure.savefig(t9, format=fileTipe, dpi=300, bbox_inches="tight")
+		try:
+			data = pd.read_csv(t6, sep=";", index_col=("Resistance Mechanism"))
+			x = len(list(data["Core"])) * 1
+			y = 0
+			for i in data:
+				for j in range(0, len(data["Core"])):
+					if data[i][j] >= y:
+						y = data[i][j] / 3.5
+			ax = data.plot.bar(figsize=(x,y), fontsize=15)
+			ax.figure.savefig(t8, format=fileType, dpi=300, bbox_inches="tight")
+
+			data = pd.read_csv(t7, sep=";", index_col=("Drug Class"))
+			x = len(list(data["Core"])) * 1
+			y = 0
+			for i in data:
+				for j in range(0, len(data["Core"])):
+					if data[i][j] >= y:
+						y = data[i][j] / 3.5
+			ax = data.plot.bar(figsize=(x,y), fontsize=15)
+			ax.figure.savefig(t9, format=fileType, dpi=300, bbox_inches="tight")
+		except:
+			print("\nIt was not possible to generate the barplot.\nPlease, check the input file.\n")
 	
 	if p == "-bacmet":
 		db = pd.read_csv("DB/bacmet_2.txt", sep="\t")
@@ -1219,15 +1222,18 @@ for p in parameters:
 		outa.close()
 		outb.close()
 		
-		data = pd.read_csv(t6, sep=";", index_col=("Compound"))
-		x = len(list(data["Core"])) * 1
-		y = 1
-		for i in data:
-			for j in range(0, len(data["Core"])):
-				if data[i][j] >= y:
-					y = data[i][j] / 3.5
-		ax = data.plot.bar(figsize=(x,y), fontsize=15)
-		ax.figure.savefig(t8, format=fileTipe, dpi=300, bbox_inches="tight")
+		try:
+			data = pd.read_csv(t6, sep=";", index_col=("Compound"))
+			x = len(list(data["Core"])) * 1
+			y = 1
+			for i in data:
+				for j in range(0, len(data["Core"])):
+					if data[i][j] >= y:
+						y = data[i][j] / 3.5
+			ax = data.plot.bar(figsize=(x,y), fontsize=15)
+			ax.figure.savefig(t8, format=fileType, dpi=300, bbox_inches="tight")
+		except:
+			print("\nIt was not possible to generate the barplot.\nPlease, check the input file.\n")
 ################################################Pan_distribution#########################################
 
 #####################################################Organizando#################################################
