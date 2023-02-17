@@ -5,6 +5,7 @@ import os
 import shutil
 import math
 import time
+from datetime import datetime
 try:
 	import wget
 except:
@@ -23,7 +24,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.0.4")
+version = ("1.0.5")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -86,56 +87,85 @@ Let's continue with your analysis.''')
 ##################################Functions start################################
 def checkDP():
 	print("\nChecking your dependences...")
-	if "Dependences" not in os.listdir():
-		os.mkdir("Dependences")
-	if "diamond" not in os.listdir("Dependences"):
+	home = os.path.expanduser('~')
+	config_file = home+"/.panvita.dp.paths"
+	if os.path.exists(config_file) == True:
+		with open(config_file, "rt") as file:
+			cfile = file.readlines()
+			dppath = cfile[0].strip()
+			file.close()
+	else:
+		dppath = os.getcwd()+"/Dependences/"
+		with open(config_file, "w") as file:
+			file.write(dppath)
+			file.close()
+	if "Dependences" not in os.listdir(str(dppath.replace("Dependences/",""))):
+		os.mkdir(dppath)
+	if "diamond" not in os.listdir(dppath):
 		print("You may not have DIAMOND.\nWe will try to get it.\n")
 		atual = os.listdir()
 		diamond = wget.download("http://github.com/bbuchfink/diamond/releases/download/v0.9.24/diamond-linux64.tar.gz")
 		os.system("tar -xzf diamond-linux64.tar.gz")
 		os.system("chmod 755 diamond")
-		os.rename("diamond", "Dependences/diamond")
+		os.rename("diamond", dppath+"diamond")
 		for i in os.listdir():
 			if i not in atual:
 				os.remove(i)
 		print("\nDIAMOND - Download complete!")
+	return(dppath)
 
 def checkDB():
 	print("\nChecking your databases...")
-	if "DB" not in os.listdir():
-		os.mkdir("DB")
-	if ("bacmet_2.fasta" not in os.listdir("DB")) or ("bacmet_2.txt" not in os.listdir("DB")):
+	home = os.path.expanduser('~')
+	config_file = home+"/.panvita.db.paths"	
+	if os.path.exists(config_file) == True:
+		with open(config_file, "rt") as file:
+			cfile = file.readlines()
+			dbpath = cfile[0].strip()
+			file.close()
+	else:
+		dbpath = os.getcwd()+"/DB/"
+		with open(config_file, "w") as file:
+			file.write(dbpath)
+			file.close()
+	if "DB" not in os.listdir(str(dbpath.replace("DB/",""))):
+		os.mkdir(dbpath)
+
+	if ("bacmet_2.fasta" not in os.listdir(dbpath)) or ("bacmet_2.txt" not in os.listdir(dbpath)):
 		print("\nDownloading BacMet database...")
 		bacmet = wget.download("http://bacmet.biomedicine.gu.se/download/BacMet2_EXP_database.fasta")
-		os.rename(bacmet, "DB/bacmet_2.fasta")
-		os.system(diamond_exe+" makedb --in DB/bacmet_2.fasta -d DB/bacmet_2 --quiet")
+		os.rename(bacmet, dbpath+"bacmet_2.fasta")
+		print("")
+		os.system(diamond_exe+" makedb --in "+dbpath+"bacmet_2.fasta -d "+dbpath+"bacmet_2 --quiet")
 		print("\nDownloading BacMet annotation file...")
 		bacmet_an = wget.download("http://bacmet.biomedicine.gu.se/download/BacMet2_EXP.753.mapping.txt")
-		os.rename(bacmet_an, "DB/bacmet_2.txt")
-	if "vfdb_core.fasta" not in os.listdir("DB"):
+		os.rename(bacmet_an, dbpath+"bacmet_2.txt")
+	if "vfdb_core.fasta" not in os.listdir(dbpath):
 		print("\nDownloading VFDB database...")
 		vfdb = wget.download("http://www.mgc.ac.cn/VFs/Down/VFDB_setA_pro.fas.gz")
 		os.rename(vfdb, "vfdb_core.fasta.gz")
 		os.system("gunzip -d vfdb_core.fasta.gz")
-		os.rename("vfdb_core.fasta", "DB/vfdb_core.fasta")
-		os.system(diamond_exe+" makedb --in DB/vfdb_core.fasta -d DB/vfdb_core --quiet")
-	if "card_protein_homolog_model.fasta" not in os.listdir("DB"):
+		os.rename("vfdb_core.fasta", dbpath+"vfdb_core.fasta")
+		print("")
+		os.system(diamond_exe+" makedb --in "+dbpath+"vfdb_core.fasta -d "+dbpath+"vfdb_core --quiet")
+	if "card_protein_homolog_model.fasta" not in os.listdir(dbpath):
 		atual = os.listdir()
 		print("\nDownloading CARD database...")
 		card = wget.download("https://card.mcmaster.ca/latest/data")
 		os.system("tar -jxvf "+card)
-		os.rename("protein_fasta_protein_homolog_model.fasta", "DB/card_protein_homolog_model.fasta")
-		os.rename("aro_index.tsv", "DB/aro_index.tsv")
+		os.rename("protein_fasta_protein_homolog_model.fasta", dbpath+"card_protein_homolog_model.fasta")
+		os.rename("aro_index.tsv", dbpath+"aro_index.tsv")
 		for i in os.listdir():
 			if i not in atual:
 				os.remove(i)
-		os.system(diamond_exe+" makedb --in DB/card_protein_homolog_model.fasta -d DB/card_protein_homolog_model --quiet")
-	'''if "megares_v2.fasta" not in os.listdir("DB"):
+		print("")
+		os.system(diamond_exe+" makedb --in "+dbpath+"card_protein_homolog_model.fasta -d "+dbpath+"card_protein_homolog_model --quiet")
+	'''if "megares_v2.fasta" not in os.listdir(dbpath):
 		print("\nDownloading MEGARes database...")
 		megares = wget.download("https://megares.meglab.org/download/megares_v2.00/megares_full_database_v2.00.fasta")
-		os.rename(megares, "DB/megares_v2.fasta")
-		os.system("makeblastdb -in DB/megares_v2.fasta -title megares_v2 -dbtype prot -out DB/megares_v2")'''
-
+		os.rename(megares, dbpath+"megares_v2.fasta")
+		os.system("makeblastdb -in "+dbpath+"megares_v2.fasta -title megares_v2 -dbtype prot -out "+dbpath+"megares_v2")'''
+	return(dbpath)
 def getMeta(a):
 	mlst = shutil.which("mlst")
 	out = open(a, "w")
@@ -189,11 +219,11 @@ def getMeta(a):
 			if "-b" in sys.argv:
 				try:
 					print(temp3)
-					os.system("mlst --quiet "+temp3+".gbf > temp.temp")
-					sttemp = open("temp.temp", "rt")
+					os.system("mlst --quiet "+temp3+".gbf > .temp.temp")
+					sttemp = open(".temp.temp", "rt")
 					st = sttemp.readlines()[0].split("\t")[2]
 					sttemp.close()
-					os.remove("temp.temp")
+					os.remove(".temp.temp")
 					out.write(str(st)+";")
 				except:
 					out.write("NA;")
@@ -214,7 +244,9 @@ def getNCBI_GBF():
 			ftp = ftp + file
 			print("Strain",i,"\n",ftp)
 		else:
-			print("ERRO: It was'nt possible to download the file",i+".\nPlease check the log file.\n")
+			erro_string = "ERRO: It was'nt possible to download the file",i+".\nPlease check the log file.\n"
+			erro.append(erro_string)
+			print(erro_string)
 			continue
 		file = wget.download(ftp)
 		print("\n")
@@ -253,7 +285,9 @@ def getNCBI_FNA():
 			ftp = ftp + file
 			print("Strain",i,"\n",ftp)
 		else:
-			print("ERRO: It was'nt possible to download the file",i+".\nPlease check the log file.\n")
+			erro_string = "ERRO: It was'nt possible to download the file",i+".\nPlease check the log file.\n"
+			erro.append(erro_string)
+			print(erro_string)
 			continue
 		file = wget.download(ftp)
 		print("\n")
@@ -263,12 +297,16 @@ def getNCBI_FNA():
 		genus = dic3[i][0].split(" ")[0]
 		species = dic3[i][0].split(" ")[1]
 		strain = i.replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
+		if "-s" in sys.argv:
+			new_file = strain
+		else:
+			new_file = genus[0]+species+"_"+strain
 		try:
-			file = os.rename(file, strain+".fna")
+			file = os.rename(file, new_file+".fna")
 		except:
 			time.sleep(3)
-			file = os.rename(file, strain+".fna")
-		file = strain+".fna"
+			file = os.rename(file, new_file+".fna")
+		file = new_file+".fna"
 		ltag = genus[0]+species[0]+strain
 		temp = "./"+ltag+"/"+strain+".gbf"
 		pkgbf.append(temp)
@@ -285,7 +323,9 @@ def getNCBI_FNA():
 				print(i)
 				os.system(i)
 		else:
-			print("Sorry but we didn't find PROKKA in your computer.\nBe sure that the installation was performed well.\nThe annotation will not occur.\nIf you install PROKKA some day, you can use a script we made specially for you!\n")
+			erro_string = "Sorry but we didn't find PROKKA in your computer.\nBe sure that the installation was performed well.\nThe annotation will not occur.\nIf you install PROKKA some day, you can use a script we made specially for you!\n"
+			print(erro_string)
+			erro.append(erro_string)
 			pkgbf = [""]
 	return(pkgbf)
 
@@ -449,27 +489,54 @@ def blastmining(a):
 	except:
 		y = 0
 
+def writeERR(erro_list):
+	erro_file = "panvita_error_"+datetime.now().strftime("%d-%m-%Y_%H-%M-%S")+".err"
+	with open(erro_file, "w") as erro_out:
+		string = "PanViTa "+str(datetime.now().strftime("%d-%m-%Y_%H-%M-%S"))+"\n"
+		erro_out.write(string)
+		erro_out.write("The following lines contains the errors from the last runing.\nPlease, check them carefully.\n")
+		for i in erro_list:
+			erro_out.write(i)
+		erro_out.write("\nIf the lines appear empty, no error has been computed for the current run.\n")
+		erro_out.close()
+	return(erro_file)
 ##################################Functions end################################
-diamond_exe = "Dependences/diamond"
-if ("-d" in sys.argv) or ("-diamond" in sys.argv):
-	if type(shutil.which("diamond-aligner")) == str:
-		diamond_exe = shutil.which("diamond-aligner")
-	elif type(shutil.which("diamond")) == str:
-		diamond_exe = shutil.which("diamond")
-	else:
-		print("\nWe could'nt locate DIAMOND on your system.\nWe'll try to use the default option.\nPlease verify the alignment outputs.\n")
+
+erro = []
 
 if ("-update" in sys.argv) or ("-u" in sys.argv):
-	if "Dependences" in os.listdir():
-		shutil.rmtree("Dependences")
-		checkDP()
+	home = os.path.expanduser('~')
+	config_file = home+"/.panvita.dp.paths"
+	if ".panvita.dp.paths" in os.listdir(home):
+		with open(config_file, "rt") as file:
+			rm_path = file.readlines()[0]
+			file.close()
+		os.remove(config_file)
+		shutil.rmtree(rm_path)
+		dppath = checkDP()
 	else:
-		checkDP()
-	if "DB" in os.listdir():
-		shutil.rmtree("DB")
-		checkDB()
+		dppath = checkDP()
+	diamond_exe = dppath+"diamond"
+	if ("-d" in sys.argv) or ("-diamond" in sys.argv):
+		if type(shutil.which("diamond-aligner")) == str:
+			diamond_exe = shutil.which("diamond-aligner")
+		elif type(shutil.which("diamond")) == str:
+			diamond_exe = shutil.which("diamond")
+		else:
+			erro_string = "\nWe could'nt locate DIAMOND on your system.\nWe'll try to use the default option.\nPlease verify the alignment outputs.\n"
+			print(erro_string)
+			erro.append(erro_string)
+
+	config_file = home+"/.panvita.db.paths"
+	if ".panvita.db.paths" in os.listdir(home):
+		with open(config_file, "rt") as file:
+			rm_path = file.readlines()[0]
+			file.close()
+		os.remove(config_file)
+		shutil.rmtree(rm_path)
+		dbpath = checkDB()
 	else:
-		checkDB()
+		dbpath = checkDB()
 	if ("-card" not in sys.argv) and ("-bacmet" not in sys.argv) and ("-vfdb" not in sys.argv):
 		print('''
 Your databases and dependences were updated. ^^
@@ -478,8 +545,25 @@ Contact: dlnrodrigues@ufmg.br
 ''')
 		exit()
 
-checkDP()
-checkDB()
+dppath = checkDP()
+diamond_exe = dppath+"diamond"
+if ("-d" in sys.argv) or ("-diamond" in sys.argv):
+	if type(shutil.which("diamond-aligner")) == str:
+		diamond_exe = shutil.which("diamond-aligner")
+	elif type(shutil.which("diamond")) == str:
+		diamond_exe = shutil.which("diamond")
+	else:
+		erro_string = "\nWe could'nt locate DIAMOND on your system.\nWe'll try to use the default option.\nPlease verify the alignment outputs.\n"
+		print(erro_string)
+		erro.append(erro_string)
+
+
+####################################################
+dbpath = checkDB()
+print("\nDependences path:\n",dppath)
+print("Selected DIAMOND:\n",diamond_exe)
+print("Databases path:\n",dbpath)
+#######################################################################################################################################################
 
 try:
 	print('\nTrying to import \'Pandas\'')
@@ -503,7 +587,7 @@ except:
 	os.system("python -m pip install -U matplotlib")
 	import matplotlib.pyplot as plt
 try:
-	print('\nTrying to import \'SciPy\'\n')
+	print('Trying to import \'SciPy\'\n')
 	import scipy
 except:
 	print("You may not have \'SciPy\'.\nWe will try to install using pip...")
@@ -535,7 +619,7 @@ if ("-a" in sys.argv) or ("-b" in sys.argv) or ("-g" in sys.argv) or ("-m" in sy
 		if ("-a" in sys.argv) or ("-g" in sys.argv):
 			dic3[strains[ind]] = (species[ind], refseq[ind], genbank[ind], biosample[ind], size[ind], GC[ind], data[ind])
 		ind = ind + 1
-#############################################################################################
+##############################################NEW############################################################
 if "-b" in sys.argv:
 	gbff = getNCBI_GBF()
 
@@ -571,16 +655,15 @@ for i in sys.argv:
 
 if len(parameters) == 0:
 	if "-b" in sys.argv:
-		if "GenBank_1" not in os.listdir():
-			pasta = "GenBank_1"
-		else:
-			ind = 2
-			pasta = "GenBank_"+str(ind)
-			while "GenBank_"+str(ind) in os.listdir():
-				ind = ind + 1
-				pasta = "GenBank_"+str(ind)
+		pasta = "GenBank_"+datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 		os.mkdir(pasta)
-		os.system("mv *.gbf "+pasta+"/")
+		for i in gbff:
+			try:
+				shutil.move(i, pasta)
+			except:
+				erro_string = "It was not possible to move the file",i,"to the final directory.\nPlease, chack the output path.\n"
+				print(erro_string)
+				erro.append(erro_string)
 	print("\nThat's all folks...\nThank you so much for using this program!\n")
 	exit()
 ############################################Extrair posições#################################################
@@ -601,15 +684,15 @@ for i in files:
 				k = extract_positions(f)
 			except:
 				if os.path.exists(i) == True:
-					print("\n**WARNING**\nIt was not possible to handle the file "+str(i)+"...")
-					print("It will be skiped.")
-					print("Please verify the input format.\n")
+					erro_string = "\n**WARNING**\nIt was not possible to handle the file "+str(i)+"...\nIt will be skiped.\nPlease verify the input format.\n"
+					print(erro_string)
+					erro.append(erro_string)
 					files.pop(files.index(i))
 					continue
 				else:
-					print("\n**WARNING**\nIt was not possible to find the file "+str(i)+"...")
-					print("It will be skiped.")
-					print("Please verify the absolute path of the files.\n")
+					erro_string = "\n**WARNING**\nIt was not possible to handle the file "+str(i)+"...\nIt will be skiped.\Please verify the absolute path of the files.\n"
+					print(erro_string)
+					erro.append(erro_string)
 					files.pop(files.index(i))
 					continue
 	print("The positions of the "+i+" file have been extracted")
@@ -663,20 +746,23 @@ for i in files:
 #################################################Extrair o faa###########################################
 
 for p in parameters:
+	outputs = []
 	dirinicial = os.listdir()
 #################################################Alinhar#################################################
 	if "Tabular_1" not in os.listdir():
 		os.mkdir("Tabular_1")
+		outputs.append("Tabular_1")
 	else:
 		shutil.rmtree("Tabular_1")
 		os.mkdir("Tabular_1")
+		outputs.append("Tabular_1")
 
 	if "-card" == p:
-		b = "DB/card_protein_homolog_model.dmnd"
+		b = dbpath+"card_protein_homolog_model.dmnd"
 	elif "-vfdb" == p:
-		b = "DB/vfdb_core.dmnd"
+		b = dbpath+"vfdb_core.dmnd"
 	elif "-bacmet" == p:
-		b = "DB/bacmet_2.dmnd"
+		b = dbpath+"bacmet_2.dmnd"
 
 	print("\nStarting alignments\n")
 	for i in strains:
@@ -688,9 +774,11 @@ for p in parameters:
 #################################################Mineirar#################################################
 	if "Tabular_2" not in os.listdir():
 		os.mkdir("Tabular_2")
+		outputs.append("Tabular_2")
 	else:
 		shutil.rmtree("Tabular_2")
 		os.mkdir("Tabular_2")
+		outputs.append("Tabular_2")
 
 	print("\nMining alingments...\n")
 	for i in os.listdir("Tabular_1"):
@@ -701,7 +789,7 @@ for p in parameters:
 	comp = {}
 #################BACMET########################
 	if "-bacmet" == p:
-		bacmetFile = open('DB/bacmet_2.fasta', 'rt')
+		bacmetFile = open(dbpath+'bacmet_2.fasta', 'rt')
 		bacmet = bacmetFile.readlines()
 		bacmetFile.close()
 		for i in bacmet:
@@ -715,7 +803,7 @@ for p in parameters:
 
 #################CARD########################
 	if "-card" == p:
-		cardFile = open('DB/card_protein_homolog_model.fasta', 'rt')
+		cardFile = open(dbpath+'card_protein_homolog_model.fasta', 'rt')
 		card = cardFile.readlines()
 		cardFile.close()
 		for i in card:
@@ -732,7 +820,7 @@ for p in parameters:
 
 #################VFDB########################
 	if "-vfdb" == p:
-		vfdbFile = open('DB/vfdb_core.fasta', 'rt')
+		vfdbFile = open(dbpath+'vfdb_core.fasta', 'rt')
 		vfdb = vfdbFile.readlines()
 		vfdbFile.close()
 		for i in vfdb:
@@ -745,7 +833,7 @@ for p in parameters:
 
 #################MEGARes########################
 	'''if "-megares" == p:
-		megaresFile = open('DB/megares_v2.fasta', 'rt')
+		megaresFile = open(dbpath+'megares_v2.fasta', 'rt')
 		megares = megaresFile.readlines()
 		megaresFile.close()
 		for i in megares:
@@ -761,10 +849,13 @@ for p in parameters:
 #################################################Gerar a matriz#################################################
 	if "-card" == p:
 		titulo = "matriz_card.csv"
+		outputs.append(titulo)
 	elif "-vfdb" == p:
 		titulo = "matriz_vfdb.csv"
+		outputs.append(titulo)
 	elif "-bacmet" in sys.argv:
 		titulo = "matriz_bacmet.csv"
+		outputs.append(titulo)
 #	elif "-megares" == p:
 #		titulo = "matriz_megares.csv"
 
@@ -814,6 +905,7 @@ for p in parameters:
 		shutil.rmtree("Positions")
 		os.mkdir("Positions")
 	print("\nExtracting positions from specific factors...")
+	outputs.append("Positions")
 	for i in strains:
 		pos = {}
 		positions = "Positions_1/"+i+".tab"
@@ -861,12 +953,15 @@ for p in parameters:
 		fileType = "png"
 	if p == "-card":
 		out = "clustermap_card."+fileType
+		outputs.append(out)
 		color = "Blues"
 	elif p == "-vfdb":
 		out = "clustermap_vfdb."+fileType
+		outputs.append(out)
 		color = "Reds"
 	elif p == "-bacmet":
 		out = "clustermap_bacmet."+fileType
+		outputs.append(out)
 		color = "Greens"
 
 	df = pd.read_csv(titulo, sep=';')
@@ -893,42 +988,57 @@ for p in parameters:
 			p2 = sns.heatmap(df, cmap=color, vmin=0, vmax=100)
 			p2.figure.savefig(out, format=fileType, dpi=200, bbox_inches="tight")
 	except:
-		print("\nIt was not possible to plot the "+out+" figure...")
-		print("Please verify the GenBank files and the matrix_x.csv output.")
+		erro_string = "\nIt was not possible to plot the "+out+" figure...\nPlease verify the GenBank files and the matrix_x.csv output."
+		erro.append(erro_string)
+		print(erro_string)
 #################################################Gerar figura###################################################
 
 ############################################Omics#########################################
 	print("\nDoing presence analysis...")
 	if p == "-card":
 		t1 = "card_gene_count.csv"
+		outputs.append(t1)
 		t2 = "card_strain_count.csv"
+		outputs.append(t2)
 		t3 = "card_pan.csv"
+		outputs.append(t3)
 		t4 = "Pan-resistome development"
 		l1 = "Pan-resistome"
 		l2 = "Core-resistome"
 		t6 = "card_mechanisms.csv"
+		outputs.append(t6)
 		t7 = "card_drug_classes.csv"
+		outputs.append(t7)
 		t8 = "card_mechanisms_barplot."+fileType
 		t9 = "card_drug_classes_barplot."+fileType
 	if p == "-vfdb":
 		t1 = "vfdb_gene_count.csv"
+		outputs.append(t1)
 		t2 = "vfdb_strain_count.csv"
+		outputs.append(t2)
 		t3 = "vfdb_pan.csv"
+		outputs.append(t3)
 		t4 = "Pan-virulome development"
 		l1 = "Pan-virulome"
 		l2 = "Core-virulome"
 		t6 = "vfdb_keywords.csv"
 	if p == "-bacmet":
 		t1 = "bacmet_gene_count.csv"
+		outputs.append(t1)
 		t2 = "bacmet_strain_count.csv"
+		outputs.append(t2)
 		t3 = "bacmet_pan.csv"
+		outputs.append(t3)
 		t4 = "Pan-resistome development"
 		l1 = "Pan-resistome"
 		l2 = "Core-resistome"
 		t6 = "bacmet_heavy_metals.csv"
+		outputs.append(t6)
 		t7 = "bacmet_all_compounds.csv"
+		outputs.append(t7)
 		t8 = "bacmet_heavy_metals_barplot."+fileType
-	t5 = t3.replace("csv", fileType)	
+	t5 = t3.replace("csv", fileType)
+	outputs.append(t5)
 #Per genes
 	df2 = df
 	headers = list(df2.columns.values)
@@ -999,7 +1109,7 @@ for p in parameters:
 ############################################Pan_distribution#########################################
 	if p == "-card":
 		print("\nMaking the pan-distribution...")
-		aro = pd.read_csv("DB/aro_index.tsv", sep="\t")
+		aro = pd.read_csv(dbpath+"aro_index.tsv", sep="\t")
 		aro_genes = aro["ARO Name"].tolist()
 		aro_drug = aro["Drug Class"].tolist()
 		aro_mech = aro["Resistance Mechanism"].tolist()
@@ -1139,11 +1249,15 @@ for p in parameters:
 						y = data[i][j] / 3.5
 			ax = data.plot.bar(figsize=(x,y), fontsize=15)
 			ax.figure.savefig(t9, format=fileType, dpi=300, bbox_inches="tight")
+			outputs.append(t8)
+			outputs.append(t9)
 		except:
-			print("\nIt was not possible to generate the barplot.\nPlease, check the input file.\n")
+			erro_string = "\nIt was not possible to generate the barplot.\nPlease, check the input file.\n"
+			print(erro_string)
+			erro.append(erro_string)
 	
 	if p == "-bacmet":
-		db = pd.read_csv("DB/bacmet_2.txt", sep="\t")
+		db = pd.read_csv(dbpath+"bacmet_2.txt", sep="\t")
 		genes = db["Gene_name"].tolist()
 		compostos = db["Compound"].tolist()
 		comp = []
@@ -1232,40 +1346,40 @@ for p in parameters:
 						y = data[i][j] / 3.5
 			ax = data.plot.bar(figsize=(x,y), fontsize=15)
 			ax.figure.savefig(t8, format=fileType, dpi=300, bbox_inches="tight")
+			outputs.append(t8)
 		except:
-			print("\nIt was not possible to generate the barplot.\nPlease, check the input file.\n")
+			erro_string = "\nIt was not possible to generate the barplot.\nPlease, check the input file.\n"
+			print(erro_string)
+			erro.append(erro_string)
 ################################################Pan_distribution#########################################
 
 #####################################################Organizando#################################################
 	print("\nGrouping the results...\n")
-	diratual = os.listdir()
-	if "Results_1" not in diratual:
-		os.mkdir("Results_1")
-		atual = "Results_1"
-	else:
-		ind = 2
-		atual = "Results_"+str(ind)
-		while "Results_"+str(ind) in diratual:
-			ind = ind + 1
-			atual = "Results_"+str(ind)
-		os.mkdir(atual)
 
-	for i in diratual:
-		if i not in dirinicial:
+	atual = "Results_"+p[1:]+"_"+datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+	os.mkdir(atual)
+
+	for i in outputs:
+		try:
 			shutil.move(i, atual)
+		except:
+			erro_string = "It was not possible to move the file",i,"to the final directory.\nPlease, chack the output path.\n"
+			print(erro_string)
+			erro.append(erro_string)
 
 if "-b" in sys.argv:
-	if "GenBank_1" not in os.listdir():
-		pasta = "GenBank_1"
-	else:
-		ind = 2
-		pasta = "GenBank_"+str(ind)
-		while "GenBank_"+str(ind) in os.listdir():
-			ind = ind + 1
-			pasta = "GenBank_"+str(ind)
+	pasta = "GenBank_"+datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 	os.mkdir(pasta)
-	os.system("mv *.gbf "+pasta+"/")
+	for i in gbff:
+		try:
+			shutil.move(i, pasta)
+		except:
+			erro_string = "It was not possible to move the file",i,"to the final directory.\nPlease, chack the output path.\n"
+			erro.append(erro_string)
+			print(erro_string)
 #################################################Organizando#################################################
+
+final_erro = writeERR(erro)
 
 #################################################Removendo arquivos intermediarios#################################################
 if ("-keep" not in sys.argv) and ("-k" not in sys.argv):
