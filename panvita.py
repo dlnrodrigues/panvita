@@ -24,7 +24,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.0.5")
+version = ("1.0.6")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -244,7 +244,7 @@ def getNCBI_GBF():
 			ftp = ftp + file
 			print("Strain",i,"\n",ftp)
 		else:
-			erro_string = "ERRO: It was'nt possible to download the file",i+".\nPlease check the log file.\n"
+			erro_string = "ERROR: It was'nt possible to download the file "+str(i)+".\nPlease check the log file.\n"
 			erro.append(erro_string)
 			print(erro_string)
 			continue
@@ -285,7 +285,7 @@ def getNCBI_FNA():
 			ftp = ftp + file
 			print("Strain",i,"\n",ftp)
 		else:
-			erro_string = "ERRO: It was'nt possible to download the file",i+".\nPlease check the log file.\n"
+			erro_string = "ERROR: It was'nt possible to download the file "+str(i)+".\nPlease check the log file.\n"
 			erro.append(erro_string)
 			print(erro_string)
 			continue
@@ -661,9 +661,15 @@ if len(parameters) == 0:
 			try:
 				shutil.move(i, pasta)
 			except:
-				erro_string = "It was not possible to move the file",i,"to the final directory.\nPlease, chack the output path.\n"
+				erro_string = "It was not possible to move the file "+str(i)+" to the final directory.\nPlease, chack the output path.\n"
 				print(erro_string)
 				erro.append(erro_string)
+	if len(erro) > 0:
+		final_erro = writeERR(erro)
+		print("\nNumber of errors reported: "+str(len(erro)))
+		print("Please check the "+str(final_erro)+" file.\n")
+	else:
+		print("\nNo error reported!")
 	print("\nThat's all folks...\nThank you so much for using this program!\n")
 	exit()
 ############################################Extrair posições#################################################
@@ -1363,7 +1369,7 @@ for p in parameters:
 		try:
 			shutil.move(i, atual)
 		except:
-			erro_string = "It was not possible to move the file",i,"to the final directory.\nPlease, chack the output path.\n"
+			erro_string = "It was not possible to move the file "+str(i)+" to the final directory.\nPlease, chack the output path.\n"
 			print(erro_string)
 			erro.append(erro_string)
 
@@ -1374,12 +1380,16 @@ if "-b" in sys.argv:
 		try:
 			shutil.move(i, pasta)
 		except:
-			erro_string = "It was not possible to move the file",i,"to the final directory.\nPlease, chack the output path.\n"
+			erro_string = "It was not possible to move the file "+str(i)+" to the final directory.\nPlease, chack the output path.\n"
 			erro.append(erro_string)
 			print(erro_string)
 #################################################Organizando#################################################
-
-final_erro = writeERR(erro)
+if len(erro) > 0:
+	final_erro = writeERR(erro)
+	print("\nNumber of errors reported: "+str(len(erro)))
+	print("Please check the "+str(final_erro)+" file.\n")
+else:
+	print("No error reported!\n")
 
 #################################################Removendo arquivos intermediarios#################################################
 if ("-keep" not in sys.argv) and ("-k" not in sys.argv):
