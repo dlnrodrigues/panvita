@@ -24,7 +24,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.0.6")
+version = ("1.0.7")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -307,7 +307,7 @@ def getNCBI_FNA():
 			time.sleep(3)
 			file = os.rename(file, new_file+".fna")
 		file = new_file+".fna"
-		ltag = genus[0]+species[0]+strain
+		ltag = genus[0]+species[0]+"_"+strain
 		temp = "./"+ltag+"/"+strain+".gbf"
 		pkgbf.append(temp)
 		cmd = ("prokka --addgenes --force --species "+species+" --genus "+genus+" --strain "+strain+" "+file+" --prefix "+ltag+" --outdir "+ltag+" --locustag "+ltag)
