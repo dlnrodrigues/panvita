@@ -24,7 +24,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.0.7")
+version = ("1.0.8")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -255,7 +255,7 @@ def getNCBI_GBF():
 		dic[i] = (dic[i][0], file)
 		genus = dic[i][0].split(" ")[0]
 		species = dic[i][0].split(" ")[1]
-		strain = i.replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
+		strain = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
 		if "-s" in sys.argv:
 			ltag = strain
 		else:
@@ -296,7 +296,7 @@ def getNCBI_FNA():
 		dic3[i] = (dic3[i][0], file)
 		genus = dic3[i][0].split(" ")[0]
 		species = dic3[i][0].split(" ")[1]
-		strain = i.replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
+		strain = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
 		if "-s" in sys.argv:
 			new_file = strain
 		else:
