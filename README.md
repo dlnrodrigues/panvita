@@ -33,6 +33,7 @@ User, you will be able to obtain this script using the simple command:
 ```
 git clone https://github.com/dlnrodrigues/panvita.git
 cd panvita
+python3 panvita.py -u
 python3 panvita.py -h
 ```
 ## What about dependencies?
