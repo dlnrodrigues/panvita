@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import re
 import os
 import shutil
 import math
@@ -24,7 +25,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.0.8")
+version = ("1.0.9")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -826,16 +827,23 @@ for p in parameters:
 
 #################VFDB########################
 	if "-vfdb" == p:
+		genes_comp = {}
 		vfdbFile = open(dbpath+'vfdb_core.fasta', 'rt')
 		vfdb = vfdbFile.readlines()
 		vfdbFile.close()
 		for i in vfdb:
 			if '>' in i:
+				mech = re.findall("(?<=\)\s-\s)[A-z\/\-\s]*(?=\s\()", i, flags=0)
+				if len(mech) == 1:
+					mech = mech[0]
+				else:
+					print(i)
 				ident = i[i.find('>')+1:i.find('(')]
 				if ' ' in ident:
 					ident = ident.replace(' ', '')
 				gene = i[i.find(' ')+2:i.find(')',i.find(' '))].replace("\n", "")
 				comp[str(ident)] = str(gene)
+				genes_comp[str(gene)] = str(mech)
 
 #################MEGARes########################
 	'''if "-megares" == p:
@@ -1027,7 +1035,9 @@ for p in parameters:
 		t4 = "Pan-virulome development"
 		l1 = "Pan-virulome"
 		l2 = "Core-virulome"
-		t6 = "vfdb_keywords.csv"
+		t6 = "vfdb_mechanisms.csv"
+		outputs.append(t6)
+		t7 = "vfdb_mechanisms_barplot."+fileType
 	if p == "-bacmet":
 		t1 = "bacmet_gene_count.csv"
 		outputs.append(t1)
@@ -1257,6 +1267,62 @@ for p in parameters:
 			ax.figure.savefig(t9, format=fileType, dpi=300, bbox_inches="tight")
 			outputs.append(t8)
 			outputs.append(t9)
+		except:
+			erro_string = "\nIt was not possible to generate the barplot.\nPlease, check the input file.\n"
+			print(erro_string)
+			erro.append(erro_string)
+
+	if p == "-vfdb":
+		print("\nMaking the pan-distribution...")
+
+		genes = pd.read_csv(t1, sep=";")
+		core = []
+		acce = []
+		exclusive = []
+		g = genes["Genes"].tolist()
+		n = genes["Presence Number"].tolist()
+		for i in range(0, len(g)):
+			if n[i] == len(strains):
+				core.append(g[i])
+			elif (n[i]>1) and (n[i]<len(strains)):
+				acce.append(g[i])
+			elif n[i] == 1:
+				exclusive.append(g[i])
+
+		out = open(t6, "w")
+		out.write("Virulence Mechanism;Core;Accessory;Exclusive\n")
+		mech = []
+		for k in genes_comp:
+			if genes_comp[k] not in mech:
+				mech.append(genes_comp[k])
+		for mechanism in mech:
+			core_number = 0
+			accessory_number = 0
+			exclusive_number = 0
+			for gene in core:
+				if genes_comp[gene] == mechanism:
+					core_number = core_number + 1
+			for gene in acce:
+				if genes_comp[gene] == mechanism:
+					accessory_number = accessory_number + 1
+			for gene in exclusive:
+				if genes_comp[gene] == mechanism:
+					exclusive_number = exclusive_number + 1
+			if (core_number != 0) or (accessory_number != 0) or (exclusive_number != 0):
+				out.write(str(mechanism).capitalize()+";"+str(core_number)+";"+str(accessory_number)+";"+str(exclusive_number)+"\n")
+		out.close()
+
+		try:
+			data = pd.read_csv(t6, sep=";", index_col=("Virulence Mechanism"))
+			x = len(list(data["Core"])) * 1
+			y = 0
+			for i in data:
+				for j in range(0, len(data["Core"])):
+					if data[i][j] >= y:
+						y = data[i][j] / 3.5
+			ax = data.plot.bar(figsize=(x,y), fontsize=15)
+			ax.figure.savefig(t7, format=fileType, dpi=300, bbox_inches="tight")
+			outputs.append(t7)
 		except:
 			erro_string = "\nIt was not possible to generate the barplot.\nPlease, check the input file.\n"
 			print(erro_string)
