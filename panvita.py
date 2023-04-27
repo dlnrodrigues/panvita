@@ -25,7 +25,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.0.9")
+version = ("1.1.0")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -161,6 +161,11 @@ def checkDB():
 				os.remove(i)
 		print("")
 		os.system(diamond_exe+" makedb --in "+dbpath+"card_protein_homolog_model.fasta -d "+dbpath+"card_protein_homolog_model --quiet")
+	if "latlon.csv" not in os.listdir(dbpath):
+		print("\nDownloading coordinates keys file...")
+		latlon = wget.download("https://raw.githubusercontent.com/dlnrodrigues/panvita/dlnrodrigues-Supplementary/latlon.csv")
+		os.rename(latlon, dbpath+"latlon.csv")
+		print("")
 	'''if "megares_v2.fasta" not in os.listdir(dbpath):
 		print("\nDownloading MEGARes database...")
 		megares = wget.download("https://megares.meglab.org/download/megares_v2.00/megares_full_database_v2.00.fasta")
@@ -230,6 +235,71 @@ def getMeta(a):
 					out.write("NA;")
 		out.write(str(dic2[i][3])+"\n")
 	out.close()
+
+	meta = pd.read_csv("meta_data.csv", sep=";")
+	countries = meta["Geografic Localization"].tolist()
+	latlon = dbpath+"latlon.csv"
+	countries_keys = pd.read_csv(latlon, sep=";", index_col="homecontinent")
+
+	unique = []
+	k = []
+	for i in countries:
+		if type(i) == str:
+			if ":" not in i:
+				string = i
+				k.append(string)
+			else:
+				string = i.split(":")[0]
+				k.append(string)
+			if string not in unique:
+				unique.append(string)
+
+	cont = []
+	for i in unique:
+		cont.append(k.count(i))
+
+	data = {}
+	homelat = []
+	homelon = []
+	for i in unique:
+		if i in countries_keys.index.values.tolist():
+			homelat.append(countries_keys["homelat"][i])
+			homelon.append(countries_keys["homelon"][i])
+		else:
+			print("Nao foi dessa vez")
+	data = {"homecontinent": unique,
+			"homelat": homelat,
+			"homelon": homelon,
+			"n": cont}
+	data = pd.DataFrame.from_dict(data)
+	data.to_csv("meta_data_countries_count.csv")
+
+	try:
+		plt.figure(figsize=(20, 15))
+		plt.rcParams["figure.figsize"]=20,15;
+
+		m=Basemap(llcrnrlon=-180, llcrnrlat=-65, urcrnrlon=180, urcrnrlat=80)
+		m.drawmapboundary(fill_color='#A6CAE0', linewidth=0)
+		m.fillcontinents(color='green', alpha=0.3)
+		m.drawcoastlines(linewidth=0.1, color="white")
+
+		data['labels_enc'] = pd.factorize(data['homecontinent'])[0]
+
+		m.scatter(
+			x=data['homelon'], 
+			y=data['homelat'], 
+			s=data['n']*100, 
+			alpha=0.4, 
+			c=data['labels_enc'], 
+			cmap="plasma")
+		 
+		#plt.text(-175, -62,'Isolates geographical localization', ha='left', va='bottom', size=, color='#555555' )
+
+		plt.savefig('meta_data_maps.png', dpi=300, bbox_inches="tight")
+	except:
+		erro_string = "ERROR: It was'nt possible to plot the final map.\nPlease check the log file.\n"
+		erro.append(erro_string)
+		print(erro_string)
 
 def getNCBI_GBF():
 	gbff = []
@@ -588,12 +658,19 @@ except:
 	os.system("python -m pip install -U matplotlib")
 	import matplotlib.pyplot as plt
 try:
-	print('Trying to import \'SciPy\'\n')
+	print('Trying to import \'SciPy\'')
 	import scipy
 except:
 	print("You may not have \'SciPy\'.\nWe will try to install using pip...")
 	os.system("pip install scipy --user")
 	import scipy
+try:
+	print('Trying to import \'Basemap\'\n')
+	from mpl_toolkits.basemap import Basemap
+except:
+	print("You may not have \'Basemap\'.\nWe will try to install using pip...")
+	os.system("pip install basemap --user")
+	from mpl_toolkits.basemap import Basemap as pd
 #############################################NEW################################################################
 if ("-a" in sys.argv) or ("-b" in sys.argv) or ("-g" in sys.argv) or ("-m" in sys.argv):
 	for i in sys.argv:
