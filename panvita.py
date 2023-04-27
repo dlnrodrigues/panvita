@@ -288,7 +288,7 @@ def getMeta(a):
 		m.scatter(
 			x=data['homelon'], 
 			y=data['homelat'], 
-			s=data['n']*100, 
+			s=data['n']*10, 
 			alpha=0.4, 
 			c=data['labels_enc'], 
 			cmap="plasma")
