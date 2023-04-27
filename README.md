@@ -44,6 +44,7 @@ pip install wget
 pip install seaborn
 pip install pandas
 pip install matplotlib
+pip install basemap
 ```
 
 If you have conda support, the following commands may work:
@@ -52,6 +53,7 @@ conda install -c anaconda wget
 conda install seaborn
 conda install pandas
 conda install -c conda-forge matplotlib
+conda install -c anaconda basemap
 ```
 ## How do I use this tool?
 PanViTa uses some parameters to work properly. They are listed bellow.
