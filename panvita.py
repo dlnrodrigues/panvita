@@ -25,7 +25,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.1.0")
+version = ("1.2.0")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -670,7 +670,7 @@ try:
 except:
 	print("You may not have \'Basemap\'.\nWe will try to install using pip...")
 	os.system("pip install basemap --user")
-	from mpl_toolkits.basemap import Basemap as pd
+	from mpl_toolkits.basemap import Basemap
 #############################################NEW################################################################
 if ("-a" in sys.argv) or ("-b" in sys.argv) or ("-g" in sys.argv) or ("-m" in sys.argv):
 	for i in sys.argv:
