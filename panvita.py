@@ -25,7 +25,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.1.1")
+version = ("1.1.2")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -464,7 +464,7 @@ def extract_positions(a):
 	lenght = 0
 	totalcds = 0
 	for i in range(0, len(cds)):
-		if "   CDS   " in cds[i]:
+		if ("   CDS   " in cds[i]) and ("   ::" not in cds[i]):
 			locus_tag = ""
 			position = ""
 			for j in range(i, len(cds)):
