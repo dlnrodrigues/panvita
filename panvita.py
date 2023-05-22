@@ -6,6 +6,7 @@ import os
 import shutil
 import math
 import time
+import gzip
 from datetime import datetime
 try:
 	import wget
@@ -25,7 +26,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.1.2")
+version = ("1.1.3")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -176,16 +177,18 @@ def getMeta(a):
 	mlst = shutil.which("mlst")
 	out = open(a, "w")
 	if type(mlst) != str:
-		out.write("Species;Strain;Host;Host Disease;Geografic Localization;Isolation Source;Genomic Size;GC%;Release Date;BioSample\n")
+		out.write("Species\tStrain\tHost\tHost Disease\tGeografic Localization\tIsolation Source\tGenomic Size\tGC%\tRelease Date\tBioSample\n")
 	else:
-		out.write("Species;Strain;Host;Host Disease;Geografic Localization;Isolation Source;Genomic Size;GC%;Release Date;ST;BioSample\n")
+		out.write("Species\tStrain\tHost\tHost Disease\tGeografic Localization\tIsolation Source\tGenomic Size\tGC%\tRelease Date\tST\tBioSample\n")
+	out.close()
 	for i in dic2.keys():
+		out = open(a, "a")
 		spex = dic2[i][0].split(" ")
 		spex = spex[0]+" "+spex[1]
-		out.write(str(spex)+";")
+		out.write(str(spex)+"\t")
 		temp = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
 		temp3 = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
-		out.write(temp+";")
+		out.write(temp+"\t")
 		ID = "https://www.ncbi.nlm.nih.gov/biosample/"+str(dic2[i][3])
 		print(ID)
 		file = wget.download(ID)
@@ -201,26 +204,26 @@ def getMeta(a):
 			host = (x[(x.find("<th>host</th><td>")+17):(x.find("<", (x.find("<th>host</th><td>")+17)))]).strip().capitalize()
 		else:
 			host = "NA"
-		out.write(host+";")
+		out.write(host+"\t")
 		if x.find("host disease</th><td>") != -1:
 			disease = (x[(x.find("host disease</th><td>")+21):(x.find("<", (x.find("host disease</th><td>")+21)))]).strip().capitalize()
 		else:
 			disease = "NA"
-		out.write(disease+";")
+		out.write(disease+"\t")
 		if x.find("geo_loc_name=") != -1:
 			geo = (x[(x.find("geo_loc_name=")+13):(x.find("&", (x.find("geo_loc_name=")+13)))]).strip()
 		else:
 			geo = "NA"
-		out.write(geo+";")
+		out.write(geo+"\t")
 		if x.find(">isolation source</th><td>") != -1:
 			source = (x[(x.find(">isolation source</th><td>")+26):(x.find("<", (x.find(">isolation source</th><td>")+26)))]).strip().capitalize()
 		else:
 			source = "NA"
-		out.write(source+";")
+		out.write(source+"\t")
 		os.remove(file)
-		out.write(str(dic2[i][4])+";")
-		out.write(str(dic2[i][5])+";")
-		out.write(str(dic2[i][6][:dic2[i][6].find("T")])+";")
+		out.write(str(dic2[i][4])+"\t")
+		out.write(str(dic2[i][5])+"\t")
+		out.write(str(dic2[i][6][:dic2[i][6].find("T")])+"\t")
 		if type(mlst) == str:
 			if "-b" in sys.argv:
 				try:
@@ -230,13 +233,13 @@ def getMeta(a):
 					st = sttemp.readlines()[0].split("\t")[2]
 					sttemp.close()
 					os.remove(".temp.temp")
-					out.write(str(st)+";")
+					out.write(str(st)+"\t")
 				except:
-					out.write("NA;")
+					out.write("NA\t")
 		out.write(str(dic2[i][3])+"\n")
-	out.close()
+		out.close()
 
-	meta = pd.read_csv("meta_data.csv", sep=";")
+	meta = pd.read_csv("meta_data.tsv", sep="\t")
 	countries = meta["Geografic Localization"].tolist()
 	latlon = dbpath+"latlon.csv"
 	countries_keys = pd.read_csv(latlon, sep=";", index_col="homecontinent")
@@ -261,13 +264,17 @@ def getMeta(a):
 	data = {}
 	homelat = []
 	homelon = []
+	cont = []
+	temp_unique = []
 	for i in unique:
 		if i in countries_keys.index.values.tolist():
 			homelat.append(countries_keys["homelat"][i])
 			homelon.append(countries_keys["homelon"][i])
+			cont.append(k.count(i))
+			temp_unique.append(i)
 		else:
-			print("Nao foi dessa vez")
-	data = {"homecontinent": unique,
+			print(f"Unidentified country: {i}")
+	data = {"homecontinent": temp_unique,
 			"homelat": homelat,
 			"homelon": homelon,
 			"n": cont}
@@ -303,27 +310,22 @@ def getMeta(a):
 
 def getNCBI_GBF():
 	gbff = []
+	attempts = []
+	removal = []
 	for i in dic.keys():
 		if type(dic[i][1]) == str:
 			ftp = dic[i][1]
 			file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.gbff.gz"
 			ftp = ftp + file
-			print("Strain",i,"\n",ftp)
 		elif type(dic[i][2]) == str:
 			ftp = dic[i][2]
 			file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.gbff.gz"
 			ftp = ftp + file
-			print("Strain",i,"\n",ftp)
 		else:
-			erro_string = "ERROR: It was'nt possible to download the file "+str(i)+".\nPlease check the log file.\n"
+			erro_string = f"ERROR: It was'nt possible to download the file {str(i)}.\nIt dosen't have a FTP accession.\nPlease check the log file.\n"
 			erro.append(erro_string)
 			print(erro_string)
 			continue
-		file = wget.download(ftp)
-		print("\n")
-		os.system("gunzip "+str(file))
-		file = file.replace(".gz", "")
-		dic[i] = (dic[i][0], file)
 		genus = dic[i][0].split(" ")[0]
 		species = dic[i][0].split(" ")[1]
 		strain = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
@@ -331,13 +333,44 @@ def getNCBI_GBF():
 			ltag = strain
 		else:
 			ltag = genus[0]+species+"_"+strain
+		attempts.append((ftp, species, genus, strain, ltag))
+		indic = 0
+	while len(attempts) != 0:
 		try:
-			os.rename(file, ltag+".gbf")
+			print(f"Strain {attempts[0][3]}: attempt {indic + 1}\n{attempts[0][0]}")
+			file = wget.download(attempts[0][0])
+			print("\n")
+			newfile = file.replace(" ", "_").replace("(", "").replace(")", "")
+			os.rename(file, newfile)
+			removal.append(newfile)
+			file = newfile
+			os.system(f"gunzip {file}")
+			file = file.replace(".gz", "")
+			dic[i] = (dic[i][0], file)
+			try:
+				os.rename(file, attempts[0][4]+".gbf")
+			except:
+				time.sleep(3)
+				os.rename(file, attempts[0][4]+".gbf")
+			attempts.pop(0)
+			gbff.append(f"./{attempts[0][4]}.gbf")
+			indic = 0
 		except:
-			time.sleep(3)
-			os.rename(file, ltag+".gbf")
-		temp = "./"+ltag+".gbf"
-		gbff.append(temp)
+			indic = indic + 1
+			if indic > 4:
+				attempts.pop(0)
+				erro_string = f"ERROR: It was'nt possible to download the GenBank file for the strain {attempts[0][3]} even after 5 attempts.\nPlease check the internet conection, the log and input files.\n"
+				erro.append(erro_string)
+				print(erro_string)
+				indic = 0
+				continue
+			else:
+				continue
+	for i in os.listdir("."):
+		if i.endswith(".tmp"):
+			os.remove(i)
+		elif i in removal:
+			os.remove(i)
 	return(gbff)
 
 def getNCBI_FNA():
@@ -705,7 +738,7 @@ if ("-a" in sys.argv) or ("-g" in sys.argv):
 	pkgbf = getNCBI_FNA()
 
 if "-m" in sys.argv:
-	getMeta("meta_data.csv")
+	getMeta("meta_data.tsv")
 ##############################################NEW############################################################
 
 files = []
