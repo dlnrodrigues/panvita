@@ -352,8 +352,8 @@ def getNCBI_GBF():
 			except:
 				time.sleep(3)
 				os.rename(file, attempts[0][4]+".gbf")
-			attempts.pop(0)
 			gbff.append(f"./{attempts[0][4]}.gbf")
+			attempts.pop(0)
 			indic = 0
 		except:
 			indic = indic + 1
