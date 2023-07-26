@@ -26,7 +26,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.1.3")
+version = ("1.1.4")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -328,7 +328,7 @@ def getNCBI_GBF():
 			continue
 		genus = dic[i][0].split(" ")[0]
 		species = dic[i][0].split(" ")[1]
-		strain = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
+		strain = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","").replace("'","")
 		if "-s" in sys.argv:
 			ltag = strain
 		else:
