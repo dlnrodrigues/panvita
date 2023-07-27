@@ -26,7 +26,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.1.4")
+version = ("1.1.5")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -186,8 +186,8 @@ def getMeta(a):
 		spex = dic2[i][0].split(" ")
 		spex = spex[0]+" "+spex[1]
 		out.write(str(spex)+"\t")
-		temp = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
-		temp3 = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
+		temp = re.sub("((?![\.A-z0-9_-]).)", "_", str(i))
+		temp3 = re.sub("((?![\.A-z0-9_-]).)", "_", str(i))
 		out.write(temp+"\t")
 		ID = "https://www.ncbi.nlm.nih.gov/biosample/"+str(dic2[i][3])
 		print(ID)
@@ -328,7 +328,7 @@ def getNCBI_GBF():
 			continue
 		genus = dic[i][0].split(" ")[0]
 		species = dic[i][0].split(" ")[1]
-		strain = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","").replace("'","")
+		strain = re.sub("((?![\.A-z0-9_-]).)", "_", str(i))
 		if "-s" in sys.argv:
 			ltag = strain
 		else:
@@ -340,7 +340,7 @@ def getNCBI_GBF():
 			print(f"Strain {attempts[0][3]}: attempt {indic + 1}\n{attempts[0][0]}")
 			file = wget.download(attempts[0][0])
 			print("\n")
-			newfile = file.replace(" ", "_").replace("(", "").replace(")", "")
+			newfile = re.sub("((?![\.A-z0-9_-]).)", "_", str(file))
 			os.rename(file, newfile)
 			removal.append(newfile)
 			file = newfile
@@ -400,7 +400,7 @@ def getNCBI_FNA():
 		dic3[i] = (dic3[i][0], file)
 		genus = dic3[i][0].split(" ")[0]
 		species = dic3[i][0].split(" ")[1]
-		strain = str(i).replace(" ", "_").replace("(", "").replace(")", "").replace(";","").replace(",","").replace("/","").replace("|","").replace("\\","").replace("[","").replace("]","")
+		strain = re.sub("((?![\.A-z0-9_-]).)", "_", str(i))
 		if "-s" in sys.argv:
 			new_file = strain
 		else:
@@ -788,6 +788,7 @@ if len(parameters) == 0:
 print("\nExtracting CDS positions from GenBank files\n")
 strains = []
 pos = {}
+tempfiles = []
 for i in files:
 	try:
 		k = extract_positions(i)
@@ -804,18 +805,24 @@ for i in files:
 					erro_string = "\n**WARNING**\nIt was not possible to handle the file "+str(i)+"...\nIt will be skiped.\nPlease verify the input format.\n"
 					print(erro_string)
 					erro.append(erro_string)
-					files.pop(files.index(i))
 					continue
 				else:
 					erro_string = "\n**WARNING**\nIt was not possible to handle the file "+str(i)+"...\nIt will be skiped.\Please verify the absolute path of the files.\n"
 					print(erro_string)
 					erro.append(erro_string)
-					files.pop(files.index(i))
 					continue
+	if len(k) < 10:
+		erro_string = "\n**WARNING**\nThe file "+str(i)+" seems to be empty...\nIt will be skiped.\nPlease verify the input format.\n"
+		print(erro_string)
+		erro.append(erro_string)
+		continue		
 	print("The positions of the "+i+" file have been extracted")
+	tempfiles.append(i)
 	strain = str(i)[::-1].split('/')[0][::-1].replace(".gbk", "").replace(".gbff", "").replace(".gbf", "")
 	strains.append(strain)
+	files = tempfiles
 	pos[i] = k
+del tempfiles
 
 if "Positions_1" not in os.listdir():
 	os.mkdir("Positions_1")
