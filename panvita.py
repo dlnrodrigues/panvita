@@ -7,6 +7,8 @@ import shutil
 import math
 import time
 import gzip
+import string
+import random
 from datetime import datetime
 try:
 	import wget
@@ -26,7 +28,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.1.5")
+version = ("1.1.6")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -186,10 +188,10 @@ def getMeta(a):
 		spex = dic2[i][0].split(" ")
 		spex = spex[0]+" "+spex[1]
 		out.write(str(spex)+"\t")
-		temp = re.sub("((?![\.A-z0-9_-]).)", "_", str(i))
-		temp3 = re.sub("((?![\.A-z0-9_-]).)", "_", str(i))
+		temp = re.sub("((?![\.A-z0-9_-]).)", "_", str(dic2[i][3]))
+		temp3 = re.sub("((?![\.A-z0-9_-]).)", "_", str(dic2[i][3]))
 		out.write(temp+"\t")
-		ID = "https://www.ncbi.nlm.nih.gov/biosample/"+str(dic2[i][3])
+		ID = "https://www.ncbi.nlm.nih.gov/biosample/"+str(i)
 		print(ID)
 		file = wget.download(ID)
 		print("")
@@ -236,7 +238,7 @@ def getMeta(a):
 					out.write(str(st)+"\t")
 				except:
 					out.write("NA\t")
-		out.write(str(dic2[i][3])+"\n")
+		out.write(str(i)+"\n")
 		out.close()
 
 	meta = pd.read_csv("meta_data.tsv", sep="\t")
@@ -312,6 +314,7 @@ def getNCBI_GBF():
 	gbff = []
 	attempts = []
 	removal = []
+	all_strains = []
 	for i in dic.keys():
 		if type(dic[i][1]) == str:
 			ftp = dic[i][1]
@@ -328,7 +331,7 @@ def getNCBI_GBF():
 			continue
 		genus = dic[i][0].split(" ")[0]
 		species = dic[i][0].split(" ")[1]
-		strain = re.sub("((?![\.A-z0-9_-]).)", "_", str(i))
+		strain = re.sub("((?![\.A-z0-9_-]).)", "_", str(dic[i][3]))
 		if "-s" in sys.argv:
 			ltag = strain
 		else:
@@ -348,11 +351,23 @@ def getNCBI_GBF():
 			file = file.replace(".gz", "")
 			dic[i] = (dic[i][0], file)
 			try:
-				os.rename(file, attempts[0][4]+".gbf")
+				if attempts[0][4] not in all_strains:
+					temp_string = attempts[0][4]
+					os.rename(file, attempts[0][4]+".gbf")
+					all_strains.append(attempts[0][4])
+				else:
+					temp_string = f"{attempts[0][4]}_dup_{''.join(random.choices(string.ascii_uppercase + string.digits, k=5))}"
+					os.rename(file, f"{temp_string}.gbf")
 			except:
 				time.sleep(3)
-				os.rename(file, attempts[0][4]+".gbf")
-			gbff.append(f"./{attempts[0][4]}.gbf")
+				if attempts[0][4] not in all_strains:
+					temp_string = attempts[0][4]
+					os.rename(file, attempts[0][4]+".gbf")
+					all_strains.append(attempts[0][4])
+				else:
+					temp_string = f"{attempts[0][4]}_dup_{''.join(random.choices(string.ascii_uppercase + string.digits, k=5))}"
+					os.rename(file, f"{temp_string}.gbf")
+			gbff.append(f"./{temp_string}.gbf")
 			attempts.pop(0)
 			indic = 0
 		except:
@@ -377,46 +392,63 @@ def getNCBI_FNA():
 	prokka = shutil.which("prokka")
 	pkgbf = []
 	pk = []
+	all_strains = []
 	for i in dic3.keys():
-		if type(dic3[i][1]) == str:
-			ftp = dic3[i][1]
-			file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.fna.gz"
-			ftp = ftp + file
-			print("Strain",i,"\n",ftp)
-		elif type(dic3[i][2]) == str:
-			ftp = dic3[i][2]
-			file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.fna.gz"
-			ftp = ftp + file
-			print("Strain",i,"\n",ftp)
-		else:
-			erro_string = "ERROR: It was'nt possible to download the file "+str(i)+".\nPlease check the log file.\n"
-			erro.append(erro_string)
-			print(erro_string)
-			continue
-		file = wget.download(ftp)
-		print("\n")
-		os.system("gunzip "+str(file))
-		file = file.replace(".gz", "")
-		dic3[i] = (dic3[i][0], file)
-		genus = dic3[i][0].split(" ")[0]
-		species = dic3[i][0].split(" ")[1]
-		strain = re.sub("((?![\.A-z0-9_-]).)", "_", str(i))
-		if "-s" in sys.argv:
-			new_file = strain
-		else:
-			new_file = genus[0]+species+"_"+strain
-		try:
-			file = os.rename(file, new_file+".fna")
-		except:
-			time.sleep(3)
-			file = os.rename(file, new_file+".fna")
-		file = new_file+".fna"
-		ltag = genus[0]+species[0]+"_"+strain
-		temp = "./"+ltag+"/"+strain+".gbf"
-		pkgbf.append(temp)
-		cmd = ("prokka --addgenes --force --species "+species+" --genus "+genus+" --strain "+strain+" "+file+" --prefix "+ltag+" --outdir "+ltag+" --locustag "+ltag)
-		if ltag not in os.listdir():
-			pk.append(cmd)
+		attempts = 1
+		while True:
+			try:
+				if type(dic3[i][1]) == str:
+					ftp = dic3[i][1]
+					file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.fna.gz"
+					ftp = ftp + file
+					print("Strain",dic3[i][3],f"Attempt: {attempts}","\n",ftp)
+				elif type(dic3[i][2]) == str:
+					ftp = dic3[i][2]
+					file = "/"+ftp[:: -1].split("/")[0][:: -1]+"_genomic.fna.gz"
+					ftp = ftp + file
+					print("Strain",dic3[i][3],f"Attempt: {attempts}","\n",ftp)
+				else:
+					erro_string = "ERROR: It was'nt possible to download the file "+str(i)+".\nPlease check the log file.\n"
+					erro.append(erro_string)
+					print(erro_string)
+					continue
+				file = wget.download(ftp)
+				print("\n")
+				os.system("gunzip "+str(file))
+				file = file.replace(".gz", "")
+				genus = dic3[i][0].split(" ")[0]
+				species = dic3[i][0].split(" ")[1]
+				strain = re.sub("((?![\.A-z0-9_-]).)", "_", str(dic3[i][3]))
+				dic3[i] = (dic3[i][0], file)
+				if strain not in all_strains:
+					all_strains.append(strain)
+				else:
+					strain = f"{strain}_dup_{''.join(random.choices(string.ascii_uppercase + string.digits, k=5))}"
+				if "-s" in sys.argv:
+					new_file = strain
+				else:
+					new_file = genus[0]+species+"_"+strain
+				try:
+					file = os.rename(file, new_file+".fna")
+				except:
+					time.sleep(3)
+					file = os.rename(file, new_file+".fna")
+				file = new_file+".fna"
+				ltag = genus[0]+species[0]+"_"+strain
+				temp = "./"+ltag+"/"+strain+".gbf"
+				pkgbf.append(temp)
+				cmd = ("prokka --addgenes --force --species "+species+" --genus "+genus+" --strain "+strain+" "+file+" --prefix "+ltag+" --outdir "+ltag+" --locustag "+ltag)
+				if ltag not in os.listdir():
+					pk.append(cmd)
+				break
+			except:
+				if attempts < 5:
+					attempts = attempts + 1
+				else:
+					erro_string = f"ERROR: It was'nt possible to download the Fasta file for the strain {dic3[i][3]} even after 5 attempts.\nPlease check the internet conection, the log and input files.\n"
+					print(erro_string)
+					erro.append(erro_string)
+					break
 	uscript = open("PROKKA.sh","w")
 	for i in pk:
 		uscript.write(i+"\n")
@@ -724,11 +756,11 @@ if ("-a" in sys.argv) or ("-b" in sys.argv) or ("-g" in sys.argv) or ("-m" in sy
 	ind = 0
 	while ind in range(0, len(strains)):
 		if "-b" in sys.argv:
-			dic[strains[ind]] = (species[ind], refseq[ind], genbank[ind], biosample[ind], size[ind], GC[ind], data[ind])
+			dic[biosample[ind]] = (species[ind], refseq[ind], genbank[ind], strains[ind], size[ind], GC[ind], data[ind])
 		if "-m" in sys.argv:
-			dic2[strains[ind]] = (species[ind], refseq[ind], genbank[ind], biosample[ind], size[ind], GC[ind], data[ind])
+			dic2[biosample[ind]] = (species[ind], refseq[ind], genbank[ind], strains[ind], size[ind], GC[ind], data[ind])
 		if ("-a" in sys.argv) or ("-g" in sys.argv):
-			dic3[strains[ind]] = (species[ind], refseq[ind], genbank[ind], biosample[ind], size[ind], GC[ind], data[ind])
+			dic3[biosample[ind]] = (species[ind], refseq[ind], genbank[ind], strains[ind], size[ind], GC[ind], data[ind])
 		ind = ind + 1
 ##############################################NEW############################################################
 if "-b" in sys.argv:
