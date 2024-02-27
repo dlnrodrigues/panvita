@@ -416,7 +416,6 @@ def getNCBI_FNA():
 				print(f"Skipping file {new_file}.fna. File already exists.\n")
 				if ltag not in os.listdir():
 					pk.append(cmd)
-				print(pk)
 				break
 			try:
 				if type(dic3[i][1]) == str:
