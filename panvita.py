@@ -28,7 +28,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.1.6")
+version = ("1.1.8")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -396,6 +396,28 @@ def getNCBI_FNA():
 	for i in dic3.keys():
 		attempts = 1
 		while True:
+			genus = dic3[i][0].split(" ")[0]
+			species = dic3[i][0].split(" ")[1]
+			strain = re.sub("((?![\.A-z0-9_-]).)", "_", str(dic3[i][3]))
+			if strain not in all_strains:
+				all_strains.append(strain)
+			else:
+				strain = f"{strain}_dup_{''.join(random.choices(string.ascii_uppercase + string.digits, k=5))}"
+			if "-s" in sys.argv:
+				new_file = strain
+			else:
+				new_file = genus[0]+species+"_"+strain
+			if f"{new_file}.fna" in os.listdir():
+				file = new_file+".fna"
+				ltag = genus[0]+species[0]+"_"+strain
+				temp = "./"+ltag+"/"+strain+".gbf"
+				pkgbf.append(temp)
+				cmd = ("prokka --addgenes --force --species "+species+" --genus "+genus+" --strain "+strain+" "+file+" --prefix "+ltag+" --outdir "+ltag+" --locustag "+ltag)
+				print(f"Skipping file {new_file}.fna. File already exists.\n")
+				if ltag not in os.listdir():
+					pk.append(cmd)
+				print(pk)
+				break
 			try:
 				if type(dic3[i][1]) == str:
 					ftp = dic3[i][1]
@@ -411,27 +433,16 @@ def getNCBI_FNA():
 					erro_string = "ERROR: It was'nt possible to download the file "+str(i)+".\nPlease check the log file.\n"
 					erro.append(erro_string)
 					print(erro_string)
-					continue
+					break
 				file = wget.download(ftp)
 				print("\n")
 				os.system("gunzip "+str(file))
 				file = file.replace(".gz", "")
-				genus = dic3[i][0].split(" ")[0]
-				species = dic3[i][0].split(" ")[1]
-				strain = re.sub("((?![\.A-z0-9_-]).)", "_", str(dic3[i][3]))
 				dic3[i] = (dic3[i][0], file)
-				if strain not in all_strains:
-					all_strains.append(strain)
-				else:
-					strain = f"{strain}_dup_{''.join(random.choices(string.ascii_uppercase + string.digits, k=5))}"
-				if "-s" in sys.argv:
-					new_file = strain
-				else:
-					new_file = genus[0]+species+"_"+strain
 				try:
 					file = os.rename(file, new_file+".fna")
 				except:
-					time.sleep(3)
+					time.sleep(1)
 					file = os.rename(file, new_file+".fna")
 				file = new_file+".fna"
 				ltag = genus[0]+species[0]+"_"+strain
