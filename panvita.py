@@ -28,7 +28,7 @@ except:
 			conda install -c conda-forge/label/gcc7 python-wget""")
 		exit()
 		
-version = ("1.1.8")
+version = ("1.1.9")
 
 if ("-v" in sys.argv) or ("-version" in sys.argv):
 	print("-----------------------------------------------")
@@ -486,11 +486,20 @@ def extract_faa(a): #Extract aminoacid sequence from a gbk file
 			product = ""
 			sequence = []
 			for j in range(i, len(cds)):
-				if "/locus_tag=" in cds[j]:
+				if ("/locus_tag=" in cds[j]) and (cds[j].count('\"') == 2):
 					locus_tag = cds[j].replace("/locus_tag=", "")
 					locus_tag = locus_tag.strip()
 					locus_tag = locus_tag.replace("\"", "")
 					locus_tag = locus_tag.replace("\n", "")
+				if ("/locus_tag=" in cds[j]) and (cds[j].count('\"') == 1):
+					locus_tag = cds[j].replace("/locus_tag=", "")
+					locus_tag = locus_tag.strip()
+					locus_tag = locus_tag.replace("\"", "")
+					locus_tag = locus_tag.replace("\n", "")
+					locus_tag2 = cds[j+1].strip()
+					locus_tag2 = locus_tag2.replace("\"", "")
+					locus_tag2 = locus_tag2.replace("\n", "")
+					locus_tag = f"{locus_tag}{locus_tag2}"
 				elif "/product=" in cds[j]:
 					product = cds[j].replace("/product=", "")
 					product = product.strip()
@@ -585,15 +594,27 @@ def extract_positions(a):
 						position = position.replace("<","").replace(">","").strip()
 						position = position.split("..")
 						position = [int(position[0])+lenght, int(position[1])+lenght]
-				if "/locus_tag=" in cds[j]:
+				if ("/locus_tag=" in cds[j]) and (cds[j].count('\"') == 2):
 					locus_tag = cds[j].replace("/locus_tag=", "")
 					locus_tag = locus_tag.strip()
 					locus_tag = locus_tag.replace("\"", "")
 					locus_tag = locus_tag.replace("\n", "")
 					positions[locus_tag] = str(position[0])+"\t"+str(position[1])
 					break
+				elif ("/locus_tag=" in cds[j]) and (cds[j].count('\"') == 1):
+					locus_tag = cds[j].replace("/locus_tag=", "")
+					locus_tag = locus_tag.strip()
+					locus_tag = locus_tag.replace("\"", "")
+					locus_tag = locus_tag.replace("\n", "")
+					locus_tag2 = cds[j+1].strip()
+					locus_tag2 = locus_tag2.replace("\"", "")
+					locus_tag2 = locus_tag2.replace("\n", "")
+					locus_tag = f"{locus_tag}{locus_tag2}"
+					positions[locus_tag] = str(position[0])+"\t"+str(position[1])
+					break
 		if "CONTIG " in cds[i]:
 			lenght = lenght + int(cds[i].strip().replace(")","").split("..")[-1])
+	print(len(positions))
 	return(positions)
 
 def align(a, b, c):
@@ -665,9 +686,9 @@ if ("-update" in sys.argv) or ("-u" in sys.argv):
 	diamond_exe = dppath+"diamond"
 	if ("-d" in sys.argv) or ("-diamond" in sys.argv):
 		if type(shutil.which("diamond-aligner")) == str:
-			diamond_exe = shutil.which("diamond-aligner")
-		elif type(shutil.which("diamond")) == str:
 			diamond_exe = shutil.which("diamond")
+		elif type(shutil.which("diamond")) == str:
+			diamond_exe = shutil.which("diamond-aligner")
 		else:
 			erro_string = "\nWe could'nt locate DIAMOND on your system.\nWe'll try to use the default option.\nPlease verify the alignment outputs.\n"
 			print(erro_string)
